@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>S&S + Iron Cardio — Alternating Trainer</title>
+  <style>
+    :root{
+      --bg:#0f1115; --card:#171b23; --muted:#9aa4b2; --text:#eef2f7; --line:#2a3242;
+      --accent:#7c3aed; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+      --shadow: 0 10px 25px rgba(0,0,0,.35); --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(124,58,237,.22), transparent 60%),
+                  radial-gradient(800px 600px at 90% 0%, rgba(34,197,94,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      padding:16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .wrap{max-width:900px;margin:0 auto}
+    header{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap}
+    .brand h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .brand p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
+    .pillrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{
+      font-size:12px; color:var(--muted);
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      padding:7px 10px; border-radius:999px;
+      display:inline-flex; gap:8px; align-items:center;
+    }
+    .dot{width:8px;height:8px;border-radius:99px;background:var(--muted)}
+    .dot.good{background:var(--good)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+
+    nav{
+      position:sticky; top:10px; z-index:5;
+      display:flex; gap:10px; padding:10px;
+      background: rgba(15,17,21,.75);
+      backdrop-filter: blur(10px);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom:14px;
+    }
+    .tabbtn{
+      flex:1;
+      border:none; cursor:pointer;
+      background:transparent;
+      color:var(--muted);
+      padding:10px 10px;
+      border-radius: 12px;
+      font-weight:750;
+      letter-spacing:.2px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .tabbtn.active{background: rgba(124,58,237,.18); color:var(--text); border:1px solid rgba(124,58,237,.28)}
+    .hide{display:none !important}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:14px}
+    @media (min-width:900px){ .grid{grid-template-columns:1.2fr .8fr} }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      padding:14px;
+      box-shadow: var(--shadow);
+    }
+    .card h2{margin:0 0 10px;font-size:14px;color:var(--text);letter-spacing:.2px}
+    .sub{color:var(--muted);font-size:12.5px;line-height:1.45;margin:0 0 10px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .hr{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+
+    .btn{
+      border:none; cursor:pointer;
+      padding:12px 12px; border-radius: 14px;
+      font-weight:800; letter-spacing:.2px;
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border:1px solid rgba(255,255,255,.10);
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      min-height:44px;
+    }
+    .btn.primary{background: rgba(34,197,94,.16); border-color: rgba(34,197,94,.25)}
+    .btn.warn{background: rgba(245,158,11,.16); border-color: rgba(245,158,11,.25)}
+    .btn.bad{background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.25)}
+    .btn.block{width:100%}
+    .btn.small{padding:10px 10px;border-radius:12px;min-height:40px}
+
+    .tag{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:7px 10px; border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--text); font-size:12px; font-weight:750;
+    }
+    .tag.muted{color:var(--muted)}
+    .tag.good{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12)}
+    .tag.warn{border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.12)}
+    .tag.bad{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12)}
+
+    details{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    summary{
+      list-style:none;
+      cursor:pointer;
+      padding:12px;
+      font-weight:850;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    summary::-webkit-details-marker{display:none}
+    .detailsBody{padding:0 12px 12px}
+    .hint{color:var(--muted);font-size:12px;line-height:1.4;margin:0}
+
+    .checklist{display:flex;flex-direction:column;gap:8px}
+    .lineitem{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      padding:10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.20);
+    }
+    .liLeft{display:flex;flex-direction:column;gap:2px}
+    .liTitle{font-weight:850}
+    .liSub{color:var(--muted);font-size:12px}
+    .liRight{display:flex;gap:10px;align-items:center}
+    input[type="checkbox"]{transform:scale(1.2)}
+    .mono{font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1}
+    .bigtime{font-size:34px;font-weight:900;letter-spacing:.3px;line-height:1}
+
+    label{font-size:12.5px;color:var(--muted);display:block;margin-bottom:6px}
+    input[type="number"]{
+      width:100%;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--text);
+      border-radius: 12px;
+      padding:12px 12px;
+      outline:none;
+      min-height:44px;
+      font-size:14px;
+    }
+    .checkrow{display:flex;gap:10px;align-items:flex-start}
+    .checkrow .txt{display:flex;flex-direction:column;gap:2px}
+    .checkrow .txt b{color:var(--text);font-size:13px}
+    .checkrow .txt span{color:var(--muted);font-size:12px;line-height:1.35}
+    .callout{
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(124,58,237,.28);
+      background: rgba(124,58,237,.12);
+      color: var(--text);
+      font-size:12.5px;
+      line-height:1.45;
+    }
+    .callout.warn{border-color: rgba(245,158,11,.32); background: rgba(245,158,11,.12)}
+    .callout.good{border-color: rgba(34,197,94,.30); background: rgba(34,197,94,.10)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>S&S + Iron Cardio — Alternating Trainer</h1>
+      <p>IC kiest automatisch <b>duur</b> + <b>versie</b> en herhaalt nooit dezelfde als vorige IC sessie. Timer loopt door bij app-switch.</p>
+    </div>
+    <div class="pillrow">
+      <span class="pill"><span id="wlDot" class="dot"></span><span class="mono" id="wlText">Wake lock: uit</span></span>
+      <span class="pill"><span class="dot good"></span><span class="mono" id="todayPill">Vandaag: —</span></span>
+      <span class="pill"><span class="dot"></span><span class="mono" id="icPill">IC: —</span></span>
+    </div>
+  </header>
+
+  <nav>
+    <button class="tabbtn active" data-tab="today">Vandaag</button>
+    <button class="tabbtn" data-tab="settings">Settings</button>
+    <button class="tabbtn" data-tab="history">History</button>
+  </nav>
+
+  <section id="tab-today">
+    <div class="grid">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <span id="tagProgram" class="tag">—</span>
+          <span id="tagVariant" class="tag muted">—</span>
+          <span id="tagDuration" class="tag muted">—</span>
+        </div>
+        <p class="sub" id="todaySubtitle">—</p>
+
+        <div id="ssBlock">
+          <details id="warmDetails">
+            <summary>
+              <span>Warm-up (3 rondes)</span>
+              <span class="tag muted">dicht</span>
+            </summary>
+            <div class="detailsBody">
+              <div class="checklist" id="warmList"></div>
+              <p class="hint" style="margin-top:10px">5 reps per oefening. Rust kort. Focus op “openen”, niet “slopen”.</p>
+            </div>
+          </details>
+
+          <div class="hr"></div>
+
+          <h2>Swings</h2>
+          <p class="sub" id="swSub">—</p>
+          <div class="checklist" id="swList"></div>
+
+          <div class="hr"></div>
+
+          <h2>Get-ups</h2>
+          <p class="sub" id="guSub">—</p>
+          <div class="checklist" id="guList"></div>
+        </div>
+
+        <div id="icBlock" class="hide">
+          <div class="callout good" id="icSummary" style="margin-bottom:12px"></div>
+          <h2>Iron Cardio – sessie</h2>
+          <p class="sub" id="icMovesSub">—</p>
+          <div class="checklist" id="icMovesList"></div>
+          <div class="hr"></div>
+        </div>
+
+        <h2>Timer</h2>
+        <div class="row" style="justify-content:space-between;align-items:flex-end">
+          <div>
+            <div class="sub" style="margin:0" id="timerLabel">Stopwatch</div>
+            <div class="mono bigtime" id="timeMain">00:00</div>
+            <div class="tag muted" id="timeSub">—</div>
+          </div>
+          <div class="row">
+            <button class="btn small" id="btnMinus">−</button>
+            <span class="tag muted"><span class="mono" id="checksDone">0</span>/<span class="mono" id="checksGoal">0</span> checks</span>
+            <button class="btn small" id="btnPlus">+</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary block" id="btnStart">Start (wake lock)</button>
+          <button class="btn warn block" id="btnPause">Pauze</button>
+          <button class="btn bad block" id="btnComplete">Complete & opslaan</button>
+        </div>
+        <p class="hint" style="margin-top:10px" id="timerHint">IC gebruikt countdown met dubbele beep op 0.</p>
+
+        <div class="hr"></div>
+
+        <h2>Cooling down</h2>
+        <p class="sub">1 minuut per kant: 90/90 + Straddle.</p>
+        <div class="row" style="justify-content:space-between;align-items:flex-end">
+          <div>
+            <div class="sub" style="margin:0">Cooling timer</div>
+            <div class="mono bigtime" id="cdTime">00:00</div>
+            <div class="tag muted" id="cdStep">—</div>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="btnCdStart">Start</button>
+            <button class="btn" id="btnCdReset">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Vandaag in 10 seconden</h2>
+        <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <span class="tag muted" id="sumKey">—</span>
+          <span class="tag muted" id="sumRule">—</span>
+        </div>
+
+        <div class="callout warn" id="icRuleBox" style="display:none"></div>
+
+        <div class="hr"></div>
+
+        <h2>Status</h2>
+        <p class="sub" id="statusText">—</p>
+        <button class="btn block" id="btnResetSession">Reset huidige sessie</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-settings" class="hide">
+    <div class="grid">
+      <div class="card">
+        <h2>Programma selectie</h2>
+        <p class="sub">Als beide aan staan: om-en-om per afgeronde sessie.</p>
+
+        <div class="checkrow">
+          <input type="checkbox" id="toggleSS">
+          <div class="txt">
+            <b>Simple &amp; Sinister</b>
+            <span>Warm-up + swings + get-ups + cooling.</span>
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="checkrow">
+          <input type="checkbox" id="toggleIC">
+          <div class="txt">
+            <b>Iron Cardio</b>
+            <span>Auto IC duur + versie. Geen herhaling van vorige IC.</span>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2>Simple &amp; Sinister settings</h2>
+        <div style="max-width:320px">
+          <label>S-gewicht (S) — standaard bell (kg)</label>
+          <input type="number" id="inpS" min="4" step="4" />
+          <p class="hint">S+ = S+8. S− = S−8.</p>
+        </div>
+
+        <div style="height:10px"></div>
+        <div class="checkrow">
+          <input type="checkbox" id="toggleTimed">
+          <div class="txt">
+            <b>Timed S&amp;S aan</b>
+            <span>Timed gebruikt altijd volledig S− gewicht.</span>
+          </div>
+        </div>
+
+        <div style="height:10px"></div>
+        <div class="checkrow">
+          <input type="checkbox" id="toggleTwoArmEvery3">
+          <div class="txt">
+            <b>Elke 3e S&amp;S sessie: two-arm swings</b>
+            <span>Geldt ook als het een Timed sessie is.</span>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2>Iron Cardio options</h2>
+        <p class="sub">Als een optie uit staat, vervangt de app die rode variant door “Heavy Classic”.</p>
+
+        <div class="checkrow">
+          <input type="checkbox" id="toggleICPullup">
+          <div class="txt">
+            <b>Rood: Pull-up variant toegestaan</b>
+            <span>Classic + Pull-up (4 moves).</span>
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="checkrow">
+          <input type="checkbox" id="toggleICDouble">
+          <div class="txt">
+            <b>Rood: Double kettlebell variant toegestaan</b>
+            <span>Classic++ met 2 kettlebells (exposure).</span>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <button class="btn primary" id="btnSaveSettings">Opslaan</button>
+          <button class="btn" id="btnRecalc">Herbereken “Vandaag”</button>
+          <button class="btn bad" id="btnFactory">Factory reset</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Preview vandaag</h2>
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <span class="tag" id="prevProgram">—</span>
+          <span class="tag muted" id="prevVar">—</span>
+          <span class="tag muted" id="prevDur">—</span>
+        </div>
+        <div class="hr"></div>
+        <div class="callout">
+          <b>IC duur + kleur</b><br>
+          • 1–2 → 20 min (oranje)<br>
+          • 3–4–5 → 30 min (groen)<br>
+          • 6 → 40 min (rood)<br><br>
+          <b>No-repeat</b><br>
+          IC duur en IC versie mogen nooit gelijk zijn aan de vorige IC sessie.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-history" class="hide">
+    <div class="grid" style="grid-template-columns:1fr">
+      <div class="card">
+        <h2>History</h2>
+        <p class="sub">Complete = slaat tijd + variant op.</p>
+        <div class="row" style="margin-bottom:10px">
+          <button class="btn" id="btnExport">Export JSON</button>
+          <button class="btn" id="btnImport">Import JSON</button>
+          <button class="btn bad" id="btnClearHistory">Wis history</button>
+        </div>
+        <div id="historyList" class="checklist"></div>
+        <p class="hint" id="historyEmpty" style="margin-top:10px">Nog geen sessies opgeslagen.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  const LS_KEY = "ss_ic_alt_v1";
+  const now = () => Date.now();
+  const isoToday = () => new Date().toISOString().slice(0,10);
+  const pad2 = (n) => String(n).padStart(2,"0");
+  const msToHMS = (ms) => {
+    ms = Math.max(0, ms|0);
+    const s = Math.floor(ms/1000);
+    const h = Math.floor(s/3600);
+    const m = Math.floor((s%3600)/60);
+    const r = s%60;
+    return h>0 ? `${h}:${pad2(m)}:${pad2(r)}` : `${pad2(m)}:${pad2(r)}`;
+  };
+  const msToMMSS = (ms) => {
+    ms = Math.max(0, ms|0);
+    const s = Math.floor(ms/1000);
+    const m = Math.floor(s/60);
+    const r = s%60;
+    return `${pad2(m)}:${pad2(r)}`;
+  };
+  const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+  const roundTo4 = (kg)=>{
+    const r = Math.round((Number(kg)||0)/4)*4;
+    return Math.max(4, r||24);
+  };
+
+  // Audio: double beep
+  let audioCtx = null;
+  function ensureAudio(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(audioCtx.state === "suspended") audioCtx.resume();
+  }
+  function beep(durationMs=120, freq=880, gain=0.08){
+    try{
+      ensureAudio();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.frequency.value = freq;
+      o.type = "sine";
+      g.gain.value = gain;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      o.stop(audioCtx.currentTime + durationMs/1000);
+    }catch(e){}
+  }
+  function doubleBeep(){
+    beep(120, 880, 0.08);
+    setTimeout(()=>beep(140, 660, 0.08), 180);
+  }
+
+  const defaultState = () => ({
+    settings:{
+      enableSS:true,
+      enableIC:false,
+      S:24,
+      timedEnabled:true,
+      twoArmEvery3:true,
+      icAllowPullup:true,
+      icAllowDouble:true
+    },
+    session:{
+      todayDate: isoToday(),
+      programPlanned: "SS",
+      variantId: null,
+      variantLabel: null,
+      durationMin: null,
+      ss:{ timed:false, twoArm:false, S:24, Splus:32, Sminus:16 },
+      ic:{ color:null, roll:null, innerRoll:null, textLines:[] },
+      startedAt:null,
+      paused:false,
+      pausedAt:null,
+      totalPausedMs:0,
+      active:false,
+      countdownTotalMs:null,
+      countdownDone:false,
+      checksDone:0,
+      checksGoal:0,
+      checks:{}
+    },
+    _lastPlanKey:null,
+    history:[]
+  });
+
+  const merge = (base,incoming)=>{
+    const out = Array.isArray(base)? base.slice(): {...base};
+    for(const k in incoming){
+      const bv = base?.[k], iv = incoming[k];
+      if(iv && typeof iv==="object" && !Array.isArray(iv) && bv && typeof bv==="object" && !Array.isArray(bv)){
+        out[k]=merge(bv,iv);
+      }else{
+        out[k]=iv;
+      }
+    }
+    return out;
+  };
+
+  const load = ()=>{
+    try{
+      const raw = localStorage.getItem("ss_ic_alt_v1");
+      if(!raw) return defaultState();
+      return merge(defaultState(), JSON.parse(raw));
+    }catch(e){ return defaultState(); }
+  };
+
+  let state = load();
+  const save = ()=> localStorage.setItem("ss_ic_alt_v1", JSON.stringify(state));
+
+  // Tabs
+  const tabBtns = document.querySelectorAll(".tabbtn");
+  const tabEls = {
+    today: document.getElementById("tab-today"),
+    settings: document.getElementById("tab-settings"),
+    history: document.getElementById("tab-history"),
+  };
+  tabBtns.forEach(b=>b.addEventListener("click", ()=>{
+    tabBtns.forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    const t = b.dataset.tab;
+    Object.keys(tabEls).forEach(k => tabEls[k].classList.toggle("hide", k!==t));
+    if(t==="today") renderToday();
+    if(t==="settings") renderSettings();
+    if(t==="history") renderHistory();
+  }));
+
+  // Wake lock
+  let wakeLock = null;
+  const wlDot = document.getElementById("wlDot");
+  const wlText = document.getElementById("wlText");
+  const setWakeUI = (on)=>{
+    wlDot.className = "dot " + (on ? "good" : "");
+    wlText.textContent = on ? "Wake lock: aan" : "Wake lock: uit";
+  };
+  async function requestWakeLock(){
+    if(!("wakeLock" in navigator)){ setWakeUI(false); return; }
+    try{
+      wakeLock = await navigator.wakeLock.request("screen");
+      setWakeUI(true);
+      wakeLock.addEventListener("release", ()=> setWakeUI(false));
+    }catch(e){ setWakeUI(false); }
+  }
+  async function releaseWakeLock(){
+    try{ if(wakeLock){ await wakeLock.release(); wakeLock=null; } }catch(e){}
+    setWakeUI(false);
+  }
+  document.addEventListener("visibilitychange", async ()=>{
+    if(document.visibilityState==="visible" && state.session.active){
+      await requestWakeLock();
+    }
+  });
+
+  // History helpers
+  function lastCompletedProgram(){
+    if(!state.history.length) return null;
+    return state.history[state.history.length-1].program;
+  }
+  function lastIC(){
+    for(let i=state.history.length-1;i>=0;i--){
+      if(state.history[i].program==="IC") return state.history[i];
+    }
+    return null;
+  }
+
+  // Planning: choose SS vs IC
+  function planProgram(){
+    const s = state.settings;
+    const ssOn = !!s.enableSS;
+    const icOn = !!s.enableIC;
+    let planned = "SS";
+    if(ssOn && !icOn) planned="SS";
+    else if(!ssOn && icOn) planned="IC";
+    else if(ssOn && icOn){
+      const last = lastCompletedProgram();
+      planned = (last==="SS") ? "IC" : "SS";
+      if(!last) planned="SS";
+    }else{
+      planned="SS";
+    }
+    state.session.programPlanned = planned;
+  }
+
+  // S&S planning
+  function planSS(){
+    const S = roundTo4(state.settings.S);
+    const Splus = S + 8;
+    const Sminus = Math.max(4, S - 8);
+
+    const ssCount = state.history.filter(x => x.program==="SS").length;
+    const nextSsIndex = ssCount + 1;
+    const twoArm = state.settings.twoArmEvery3 ? (nextSsIndex % 3 === 0) : false;
+    const timed = !!state.settings.timedEnabled;
+
+    state.session.ss = { timed, twoArm, S, Splus, Sminus };
+  }
+
+  // IC planning
+  function rollD6(){ return Math.floor(Math.random()*6)+1; }
+  function icFromRoll(roll){
+    if(roll<=2) return {color:"ORANGE", duration:20};
+    if(roll<=5) return {color:"GREEN", duration:30};
+    return {color:"RED", duration:40};
+  }
+  function icVariant(color, innerRoll, opts){
+    const bucket = (innerRoll===6) ? "TERT" : (innerRoll<=2 ? "SEC" : "PRI");
+
+    if(color==="GREEN"){
+      if(bucket==="PRI") return {id:"IC_GREEN_CLASSIC", label:"Groen • Classic (single bell)", lines:[
+        "Classic: 1 clean • 1 press • 1 squat",
+        "Ademhaling leidt. Submax. Perfect reps."
+      ]};
+      if(bucket==="SEC") return {id:"IC_GREEN_T2", label:"Groen • Traveling 2’s", lines:[
+        "Traveling 2’s: 2 clean • 2 press • 2 squat (per kant)",
+        "Wissel kant na elke mini-blok."
+      ]};
+      return {id:"IC_GREEN_ALTWT", label:"Groen • Alternating weight", lines:[
+        "Alternating weight: licht ↔ medium bell",
+        "Zelfde reps als Classic (1–1–1)."
+      ]};
+    }
+
+    if(color==="ORANGE"){
+      if(bucket==="PRI") return {id:"IC_ORANGE_PRESSLADDER", label:"Oranje • Press ladder (1–2–3)", lines:[
+        "Press ladder: 1–2–3 press",
+        "Met singles: 1 clean + 1 squat (tussen ladders)."
+      ]};
+      if(bucket==="SEC") return {id:"IC_ORANGE_REPLADDER", label:"Oranje • Rep ladder (clean/press/squat)", lines:[
+        "Rep ladder (advanced):",
+        "1–2–3 clean • 1 press • 1 squat",
+        "1 clean • 1–2–3 press • 1 squat",
+        "1 clean • 1 press • 1–2–3 squat"
+      ]};
+      return {id:"IC_ORANGE_WEIGHTLADDER", label:"Oranje • Weight ladder", lines:[
+        "Weight ladder: zelfde reps, oplopend gewicht",
+        "Rust volledig tussen wissels."
+      ]};
+    }
+
+    if(color==="RED"){
+      if(bucket==="TERT"){
+        if(opts.allowDouble){
+          return {id:"IC_RED_DOUBLEBELL", label:"Rood • Classic++ (Double kettlebell)", lines:[
+            "2 KB: clean • press • squat (singles/doubles)",
+            "Exposure only. Volledig herstel tussen sets."
+          ]};
+        }else{
+          return {id:"IC_RED_HEAVYCLASSIC_DB_OFF", label:"Rood • Heavy Classic (double bell uit)", lines:[
+            "Heavy Classic: 1 clean • 1 press • 1 squat",
+            "Double bell optie staat uit → fallback."
+          ]};
+        }
+      }
+      if(bucket==="PRI"){
+        return {id:"IC_RED_SNATCHPLUS", label:"Rood • Classic + Snatch (4 moves)", lines:[
+          "Per set:",
+          "1 snatch • 1 press • 1 squat • 1 clean",
+          "Singles only. Geen ladders. Geen time pressure."
+        ]};
+      }
+      if(opts.allowPullup){
+        return {id:"IC_RED_PULLUPPLUS", label:"Rood • Classic + Pull-up (4 moves)", lines:[
+          "Per set:",
+          "1 clean • 1 pull-up (1–2 reps) • 1 press • 1 squat",
+          "Submax. Ademhaling leidt."
+        ]};
+      }else{
+        return {id:"IC_RED_HEAVYCLASSIC_PU_OFF", label:"Rood • Heavy Classic (pull-up uit)", lines:[
+          "Heavy Classic: 1 clean • 1 press • 1 squat",
+          "Pull-up optie staat uit → fallback."
+        ]};
+      }
+    }
+
+    return {id:"IC_UNKNOWN", label:"IC", lines:[]};
+  }
+
+  function chooseICSession(){
+    const prev = lastIC();
+    const prevDur = prev ? prev.durationMin : None;
+    const prevVar = prev ? prev.variantId : None;
+    const opts = { allowPullup: !!state.settings.icAllowPullup, allowDouble: !!state.settings.icAllowDouble };
+
+    let best = null;
+    for(let tries=0; tries<40; tries++){
+      const r = rollD6();
+      const base = icFromRoll(r);
+      if(prev && base.duration === prev.durationMin) continue;
+
+      const inner = rollD6();
+      const v = icVariant(base.color, inner, opts);
+      if(prev && v.id === prev.variantId) continue;
+
+      best = { roll:r, color:base.color, duration:base.duration, innerRoll:inner, variant:v };
+      break;
+    }
+
+    if(!best){
+      const prevD = prev ? prev.durationMin : null;
+      const candidates = [20,30,40].filter(x => x !== prevD);
+      const duration = candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : 30;
+      const color = (duration===20) ? "ORANGE" : (duration===30 ? "GREEN" : "RED");
+      const poolInner = [2,4,6];
+      let chosenVar = null, chosenInner = 4;
+      for(const inner of poolInner){
+        const v = icVariant(color, inner, opts);
+        if(!prev || v.id !== prev.variantId){ chosenVar=v; chosenInner=inner; break; }
+      }
+      if(!chosenVar){
+        chosenVar = icVariant(color, 4, opts);
+        chosenInner = 4;
+      }
+      best = { roll:0, color, duration, innerRoll: chosenInner, variant: chosenVar };
+    }
+
+    state.session.durationMin = best.duration;
+    state.session.variantId = best.variant.id;
+    state.session.variantLabel = best.variant.label;
+    state.session.ic = { color: best.color, roll: best.roll, innerRoll: best.innerRoll, textLines: best.variant.lines };
+  }
+
+  function planToday(){
+    const todayISO = isoToday();
+    if(state.session.todayDate !== todayISO){
+      state.session.todayDate = todayISO;
+      state.session.startedAt=null;
+      state.session.paused=false;
+      state.session.pausedAt=null;
+      state.session.totalPausedMs=0;
+      state.session.active=false;
+      state.session.countdownDone=false;
+      state.session.countdownTotalMs=null;
+      state.session.checks = {};
+      state.session.checksDone = 0;
+      state.session.checksGoal = 0;
+    }
+
+    planProgram();
+
+    if(state.session.programPlanned==="SS"){
+      planSS();
+      state.session.durationMin = null;
+      state.session.variantId = "SS";
+      state.session.variantLabel = state.session.ss.timed ? "S&S (Timed S−)" : "S&S (Practice)";
+      state.session.countdownTotalMs = null;
+    }else{
+      chooseICSession();
+      state.session.countdownTotalMs = state.session.durationMin * 60 * 1000;
+    }
+
+    const planKey = `${state.session.programPlanned}|${state.session.variantId}|${state.session.durationMin||""}`;
+    if(state._lastPlanKey !== planKey){
+      state.session.checks = {};
+      state.session.checksDone = 0;
+      state.session.countdownDone=false;
+      state._lastPlanKey = planKey;
+    }
+
+    save();
+  }
+
+  // UI refs
+  const todayPill = document.getElementById("todayPill");
+  const icPill = document.getElementById("icPill");
+  const tagProgram = document.getElementById("tagProgram");
+  const tagVariant = document.getElementById("tagVariant");
+  const tagDuration = document.getElementById("tagDuration");
+  const todaySubtitle = document.getElementById("todaySubtitle");
+  const ssBlock = document.getElementById("ssBlock");
+  const icBlock = document.getElementById("icBlock");
+  const icSummary = document.getElementById("icSummary");
+  const icMovesSub = document.getElementById("icMovesSub");
+  const icMovesList = document.getElementById("icMovesList");
+  const icRuleBox = document.getElementById("icRuleBox");
+  const warmList = document.getElementById("warmList");
+  const swList = document.getElementById("swList");
+  const guList = document.getElementById("guList");
+  const swSub = document.getElementById("swSub");
+  const guSub = document.getElementById("guSub");
+  const timerLabel = document.getElementById("timerLabel");
+  const timeMain = document.getElementById("timeMain");
+  const timeSub = document.getElementById("timeSub");
+  const statusText = document.getElementById("statusText");
+  const timerHint = document.getElementById("timerHint");
+  const checksDoneEl = document.getElementById("checksDone");
+  const checksGoalEl = document.getElementById("checksGoal");
+  const sumKey = document.getElementById("sumKey");
+  const sumRule = document.getElementById("sumRule");
+
+  // checklists
+  function renderWarm(){
+    const items = [
+      {title:"Prying Goblet Squat", sub:"5 reps • 3 rondes"},
+      {title:"Halo", sub:"5 links + 5 rechts • 3 rondes"},
+      {title:"StrongFirst Hip Bridge", sub:"5 reps • 3 rondes"},
+    ];
+    warmList.innerHTML="";
+    items.forEach(it=>{
+      const div=document.createElement("div");
+      div.className="lineitem";
+      div.innerHTML = `
+        <div class="liLeft">
+          <div class="liTitle">${it.title}</div>
+          <div class="liSub">${it.sub}</div>
+        </div>
+      `;
+      warmList.appendChild(div);
+    });
+    document.getElementById("warmDetails").open = false;
+  }
+  const keyFor = (kind, idx)=> `${kind}-${idx}`;
+
+  function recountChecks(){
+    const keys = Object.keys(state.session.checks||{});
+    const done = keys.reduce((acc,k)=> acc + (state.session.checks[k]?1:0), 0);
+    const manual = Number(state.session.checksDone||0);
+    const final = Math.max(done, manual);
+    state.session.checksDone = final;
+    checksDoneEl.textContent = final;
+    save();
+  }
+  function attachCheckboxHandlers(){
+    document.querySelectorAll('input[type="checkbox"][data-k]').forEach(cb=>{
+      cb.addEventListener("change", ()=>{
+        const k = cb.getAttribute("data-k");
+        state.session.checks[k] = cb.checked;
+        recountChecks();
+      });
+    });
+  }
+
+  function renderSSChecklist(){
+    const ss = state.session.ss;
+    renderWarm();
+    swList.innerHTML=""; guList.innerHTML="";
+    const wSwing = ss.timed ? ss.Sminus : ss.S;
+    const wGU = ss.timed ? ss.Sminus : ss.S;
+
+    swSub.textContent = ss.twoArm ? "10 sets: 10 two-arm swings" : "10 sets: 10 swings per set (L/R afwisselend)";
+    guSub.textContent = "10 reps: 1 get-up per rep (L/R afwisselend)";
+
+    for(let i=0;i<10;i++){
+      const side = ss.twoArm ? "2A" : (i%2===0 ? "L" : "R");
+      const k = keyFor("sw", i);
+      const checked = !!state.session.checks[k];
+      const div=document.createElement("div");
+      div.className="lineitem";
+      div.innerHTML = `
+        <div class="liLeft">
+          <div class="liTitle">10 ${ss.twoArm ? "two-arm" : side} @ <span class="mono">${wSwing}kg</span></div>
+          <div class="liSub">Swing set ${i+1}/10</div>
+        </div>
+        <div class="liRight">
+          <input type="checkbox" ${checked ? "checked":""} data-k="${k}">
+        </div>
+      `;
+      swList.appendChild(div);
+    }
+
+    for(let i=0;i<10;i++){
+      const side = (i%2===0 ? "L" : "R");
+      const k = keyFor("gu", i);
+      const checked = !!state.session.checks[k];
+      const div=document.createElement("div");
+      div.className="lineitem";
+      div.innerHTML = `
+        <div class="liLeft">
+          <div class="liTitle">1 TGU ${side} @ <span class="mono">${wGU}kg</span></div>
+          <div class="liSub">Get-up ${i+1}/10</div>
+        </div>
+        <div class="liRight">
+          <input type="checkbox" ${checked ? "checked":""} data-k="${k}">
+        </div>
+      `;
+      guList.appendChild(div);
+    }
+
+    state.session.checksGoal = 20;
+    checksGoalEl.textContent = "20";
+    recountChecks();
+    attachCheckboxHandlers();
+  }
+
+  function renderIC(){
+    icMovesList.innerHTML="";
+    const ic = state.session.ic;
+    const dur = state.session.durationMin;
+    const colorLabel = ic.color==="GREEN" ? "Groen" : (ic.color==="ORANGE" ? "Oranje" : "Rood");
+    icSummary.innerHTML = `<b>${state.session.variantLabel}</b><br>Duur: <b class="mono">${dur} min</b> • Kleur: <b>${colorLabel}</b>`;
+    icMovesSub.textContent = "Gebruik de checkboxes als geheugensteun. (Niet verplicht.)";
+
+    const lines = ic.textLines || [];
+    const asItems = lines.length ? lines : ["IC sessie"];
+    asItems.forEach((txt, i)=>{
+      const k = keyFor("ic", i);
+      const checked = !!state.session.checks[k];
+      const div=document.createElement("div");
+      div.className="lineitem";
+      div.innerHTML = `
+        <div class="liLeft">
+          <div class="liTitle">${txt}</div>
+          <div class="liSub">${i===0 ? "Kern" : "Notitie"}</div>
+        </div>
+        <div class="liRight">
+          <input type="checkbox" ${checked ? "checked":""} data-k="${k}">
+        </div>
+      `;
+      icMovesList.appendChild(div);
+    });
+
+    state.session.checksGoal = asItems.length;
+    checksGoalEl.textContent = String(state.session.checksGoal);
+    recountChecks();
+    attachCheckboxHandlers();
+
+    icRuleBox.style.display = "block";
+    const prev = lastIC();
+    icRuleBox.innerHTML = prev
+      ? `Vorige IC: <b class="mono">${prev.durationMin} min</b> • <b>${prev.variantLabel}</b><br><br><b>No-repeat actief:</b> vandaag kan nooit dezelfde duur en nooit dezelfde versie zijn.`
+      : `Nog geen vorige IC sessie.<br><br><b>No-repeat actief:</b> zodra je 1 IC sessie hebt opgeslagen.`;
+  }
+
+  // Timer (stopwatch for SS, countdown for IC)
+  let uiTick=null;
+  function getElapsedMs(){
+    const ses = state.session;
+    if(!ses.startedAt) return 0;
+    const end = ses.paused ? ses.pausedAt : now();
+    return Math.max(0, end - ses.startedAt - (ses.totalPausedMs||0));
+  }
+  function getRemainingMs(){
+    const total = state.session.countdownTotalMs;
+    if(!total) return null;
+    const elapsed = getElapsedMs();
+    return Math.max(0, total - elapsed);
+  }
+  function updateStatus(){
+    const ses = state.session;
+    if(!ses.startedAt){
+      statusText.textContent = "Nog niet gestart.";
+    }else if(ses.paused){
+      statusText.textContent = `Gepauzeerd • ${ses.programPlanned==="IC" ? "remaining" : "elapsed"} ${ses.programPlanned==="IC" ? msToHMS(getRemainingMs()||0) : msToHMS(getElapsedMs())}`;
+    }else{
+      statusText.textContent = `Actief • ${ses.programPlanned==="IC" ? "remaining" : "elapsed"} ${ses.programPlanned==="IC" ? msToHMS(getRemainingMs()||0) : msToHMS(getElapsedMs())}`;
+    }
+  }
+  function ensureTicks(){
+    if(!uiTick){
+      uiTick = setInterval(()=>{
+        if(state.session.programPlanned==="IC"){
+          const rem = getRemainingMs();
+          timeMain.textContent = msToHMS(rem||0);
+          timeSub.textContent = `Duur: ${state.session.durationMin} min`;
+          if(rem!==null && rem<=0 && state.session.startedAt && !state.session.countdownDone){
+            state.session.countdownDone = true;
+            save();
+            doubleBeep();
+          }
+        }else{
+          timeMain.textContent = state.session.startedAt ? msToHMS(getElapsedMs()) : "00:00";
+          timeSub.textContent = "—";
+        }
+        updateStatus();
+      }, 250);
+    }
+  }
+  function startSession(){
+    ensureAudio();
+    if(!state.session.startedAt){
+      state.session.startedAt = now();
+      state.session.totalPausedMs = 0;
+      state.session.paused=false;
+      state.session.pausedAt=null;
+      state.session.countdownDone=false;
+    }else if(state.session.paused){
+      const delta = now() - state.session.pausedAt;
+      state.session.totalPausedMs += delta;
+      state.session.paused=false;
+      state.session.pausedAt=null;
+    }
+    state.session.active=true;
+    save();
+    ensureTicks();
+    requestWakeLock();
+    updateStatus();
+  }
+  function pauseSession(){
+    if(!state.session.startedAt || state.session.paused) return;
+    state.session.paused=true;
+    state.session.pausedAt=now();
+    save();
+    updateStatus();
+  }
+  function resetSession(){
+    state.session.active=false;
+    state.session.startedAt=null;
+    state.session.paused=false;
+    state.session.pausedAt=null;
+    state.session.totalPausedMs=0;
+    state.session.countdownDone=false;
+    state.session.checks = {};
+    state.session.checksDone = 0;
+    save();
+    releaseWakeLock();
+    renderToday();
+    updateStatus();
+  }
+  function completeSession(){
+    if(!state.session.startedAt){
+      alert("Start eerst de sessie (timer).");
+      return;
+    }
+    const elapsed = getElapsedMs();
+    const entry = {
+      id: String(now()) + "-" + Math.random().toString(16).slice(2),
+      date: state.session.todayDate,
+      ts: now(),
+      program: state.session.programPlanned,
+      elapsedMs: elapsed,
+      checksDone: state.session.checksDone || 0,
+      checksGoal: state.session.checksGoal || 0,
+      variantId: state.session.variantId,
+      variantLabel: state.session.variantLabel,
+      durationMin: state.session.programPlanned==="IC" ? state.session.durationMin : null,
+    };
+    state.history.push(entry);
+
+    state.session.active=false;
+    state.session.startedAt=null;
+    state.session.paused=false;
+    state.session.pausedAt=null;
+    state.session.totalPausedMs=0;
+    state.session.countdownDone=false;
+    state.session.checks = {};
+    state.session.checksDone = 0;
+    save();
+    releaseWakeLock();
+
+    planToday();
+    renderToday();
+    renderHistory();
+
+    alert(`Opgeslagen ✅\nProgramma: ${entry.program}\nVariant: ${entry.variantLabel}\nTijd: ${msToHMS(elapsed)}`);
+  }
+
+  document.getElementById("btnMinus").addEventListener("click", ()=>{
+    const v = clamp((state.session.checksDone||0) - 1, 0, state.session.checksGoal||0);
+    state.session.checksDone = v;
+    checksDoneEl.textContent = v;
+    save();
+  });
+  document.getElementById("btnPlus").addEventListener("click", ()=>{
+    const v = clamp((state.session.checksDone||0) + 1, 0, state.session.checksGoal||0);
+    state.session.checksDone = v;
+    checksDoneEl.textContent = v;
+    save();
+  });
+  document.getElementById("btnStart").addEventListener("click", startSession);
+  document.getElementById("btnPause").addEventListener("click", pauseSession);
+  document.getElementById("btnComplete").addEventListener("click", completeSession);
+  document.getElementById("btnResetSession").addEventListener("click", ()=>{
+    if(!confirm("Reset huidige sessie? (timer + checks)")) return;
+    resetSession();
+  });
+
+  // Cooling timer
+  const cdTime = document.getElementById("cdTime");
+  const cdStep = document.getElementById("cdStep");
+  const cdSteps = [
+    {label:"90/90 — links", ms:60*1000},
+    {label:"90/90 — rechts", ms:60*1000},
+    {label:"Straddle — links", ms:60*1000},
+    {label:"Straddle — rechts", ms:60*1000},
+  ];
+  let cdStartAt=null, cdTick=null;
+  function cdPhase(){
+    if(!cdStartAt) return {done:true, label:"—", remaining:0};
+    const t = now() - cdStartAt;
+    let acc=0;
+    for(const st of cdSteps){
+      const next=acc+st.ms;
+      if(t<next) return {done:false, label:st.label, remaining:next-t};
+      acc=next;
+    }
+    return {done:true, label:"Klaar", remaining:0};
+  }
+  function renderCd(){
+    const ph = cdPhase();
+    cdStep.textContent = ph.label;
+    cdTime.textContent = ph.done ? "00:00" : msToMMSS(ph.remaining);
+    if(ph.done && cdTick){
+      clearInterval(cdTick); cdTick=null;
+      doubleBeep();
+    }
+  }
+  document.getElementById("btnCdStart").addEventListener("click", ()=>{
+    ensureAudio();
+    cdStartAt = now();
+    renderCd();
+    if(!cdTick) cdTick=setInterval(renderCd, 250);
+  });
+  document.getElementById("btnCdReset").addEventListener("click", ()=>{
+    cdStartAt=null;
+    if(cdTick){clearInterval(cdTick); cdTick=null;}
+    renderCd();
+  });
+
+  // Render Today
+  function renderToday(){
+    planToday();
+    const planned = state.session.programPlanned;
+    const dur = state.session.durationMin;
+
+    todayPill.textContent = `Vandaag: ${planned==="SS" ? "S&S" : "IC"}`
+    const prevIC = lastIC();
+    icPill.textContent = prevIC ? `IC laatst: ${prevIC.durationMin}m • ${prevIC.variantLabel}` : "IC: nog geen sessie";
+
+    if(planned==="SS"){
+      tagProgram.textContent = "Simple & Sinister";
+      tagProgram.className = "tag good";
+      tagVariant.textContent = state.session.ss.timed ? "Timed (S−)" : "Practice";
+      tagVariant.className = "tag muted";
+      tagDuration.textContent = "Timer: stopwatch";
+      tagDuration.className = "tag muted";
+      todaySubtitle.textContent = `${state.session.todayDate} • Warm-up → Swings → Get-ups → Cooling.`;
+
+      ssBlock.classList.remove("hide");
+      icBlock.classList.add("hide");
+      icRuleBox.style.display = "none";
+
+      timerLabel.textContent = "Stopwatch";
+      timerHint.textContent = "S&S gebruikt stopwatch (duur vrij).";
+      state.session.countdownTotalMs = null;
+
+      renderSSChecklist();
+      timeMain.textContent = state.session.startedAt ? msToHMS(getElapsedMs()) : "00:00";
+      timeSub.textContent = "—";
+    }else{
+      tagProgram.textContent = "Iron Cardio";
+      tagProgram.className = "tag warn";
+      tagVariant.textContent = state.session.variantLabel || "—";
+      tagVariant.className = "tag muted";
+      tagDuration.textContent = `Duur: ${dur} min`;
+      tagDuration.className = "tag muted";
+      todaySubtitle.textContent = `${state.session.todayDate} • IC sessie met countdown. Eindigt met dubbele beep.`;
+
+      ssBlock.classList.add("hide");
+      icBlock.classList.remove("hide");
+      timerLabel.textContent = "Countdown";
+      timerHint.textContent = "IC countdown: tijd over. Dubbele beep op 0. (No-repeat actief.)";
+
+      renderIC();
+      const rem = getRemainingMs();
+      timeMain.textContent = state.session.startedAt ? msToHMS(rem||0) : msToHMS(state.session.countdownTotalMs||0);
+      timeSub.textContent = `Duur: ${dur} min`;
+    }
+
+    sumKey.textContent = planned==="SS" ? `S&S • ${state.session.ss.S}kg (S)` : `IC • ${dur} min`;
+    sumRule.textContent = planned==="SS" ? (state.session.ss.timed ? "Timed = S−" : (state.session.ss.twoArm ? "Elke 3e: two-arm" : "One-arm")) : "No-repeat: duur + variant";
+
+    checksDoneEl.textContent = String(state.session.checksDone||0);
+    checksGoalEl.textContent = String(state.session.checksGoal||0);
+
+    ensureTicks();
+    updateStatus();
+  }
+
+  // Settings
+  const toggleSS = document.getElementById("toggleSS");
+  const toggleIC = document.getElementById("toggleIC");
+  const inpS = document.getElementById("inpS");
+  const toggleTimed = document.getElementById("toggleTimed");
+  const toggleTwoArmEvery3 = document.getElementById("toggleTwoArmEvery3");
+  const toggleICPullup = document.getElementById("toggleICPullup");
+  const toggleICDouble = document.getElementById("toggleICDouble");
+
+  function renderSettings(){
+    const s=state.settings;
+    toggleSS.checked=!!s.enableSS;
+    toggleIC.checked=!!s.enableIC;
+    inpS.value=s.S;
+    toggleTimed.checked=!!s.timedEnabled;
+    toggleTwoArmEvery3.checked=!!s.twoArmEvery3;
+    toggleICPullup.checked=!!s.icAllowPullup;
+    toggleICDouble.checked=!!s.icAllowDouble;
+
+    document.getElementById("prevProgram").textContent = state.session.programPlanned==="SS" ? "S&S" : "IC";
+    document.getElementById("prevProgram").className = "tag " + (state.session.programPlanned==="SS" ? "good" : "warn");
+    document.getElementById("prevVar").textContent = state.session.variantLabel || "—";
+    document.getElementById("prevDur").textContent = state.session.programPlanned==="IC" ? `${state.session.durationMin} min` : "—";
+  }
+
+  function saveSettings(){
+    const s=state.settings;
+    s.enableSS = toggleSS.checked;
+    s.enableIC = toggleIC.checked;
+    s.S = roundTo4(Number(inpS.value||24)); inpS.value=s.S;
+    s.timedEnabled = toggleTimed.checked;
+    s.twoArmEvery3 = toggleTwoArmEvery3.checked;
+    s.icAllowPullup = toggleICPullup.checked;
+    s.icAllowDouble = toggleICDouble.checked;
+    save();
+    renderToday();
+    renderSettings();
+  }
+
+  document.getElementById("btnSaveSettings").addEventListener("click", ()=>{ saveSettings(); alert("Settings opgeslagen ✅"); });
+  document.getElementById("btnRecalc").addEventListener("click", ()=>{ saveSettings(); alert("Vandaag herberekend ✅"); });
+  document.getElementById("btnFactory").addEventListener("click", ()=>{
+    if(!confirm("Factory reset? Dit wist settings + sessie + history.")) return;
+    localStorage.removeItem("ss_ic_alt_v1");
+    state = defaultState();
+    save();
+    releaseWakeLock();
+    renderToday();
+    renderSettings();
+    renderHistory();
+    alert("Reset klaar.");
+  });
+
+  // History
+  const historyList = document.getElementById("historyList");
+  const historyEmpty = document.getElementById("historyEmpty");
+
+  function renderHistory(){
+    const list = state.history.slice().reverse();
+    historyList.innerHTML="";
+    historyEmpty.style.display = list.length ? "none" : "block";
+    list.forEach(h=>{
+      const div=document.createElement("div");
+      div.className="lineitem";
+      div.innerHTML = `
+        <div class="liLeft">
+          <div class="liTitle">${h.date} — ${h.program} — ${h.variantLabel || ""}</div>
+          <div class="liSub mono">Tijd: ${msToHMS(h.elapsedMs)} ${h.program==="IC" ? ("• IC duur: "+h.durationMin+"m") : ""}</div>
+        </div>
+      `;
+      historyList.appendChild(div);
+    });
+  }
+
+  document.getElementById("btnExport").addEventListener("click", ()=>{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download="ss-ic-log.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("btnImport").addEventListener("click", ()=>{
+    const inp=document.createElement("input");
+    inp.type="file"; inp.accept="application/json";
+    inp.onchange=async ()=>{
+      const file=inp.files && inp.files[0];
+      if(!file) return;
+      try{
+        const parsed=JSON.parse(await file.text());
+        state = merge(defaultState(), parsed);
+        save();
+        renderToday(); renderSettings(); renderHistory();
+        alert("Import klaar ✅");
+      }catch(e){ alert("Kon JSON niet importeren."); }
+    };
+    inp.click();
+  });
+
+  document.getElementById("btnClearHistory").addEventListener("click", ()=>{
+    if(!confirm("History wissen?")) return;
+    state.history=[];
+    save();
+    renderHistory();
+    renderToday();
+    renderSettings();
+  });
+
+  // Init
+  renderToday();
+  renderSettings();
+  renderHistory();
+  renderCd();
+  setWakeUI(false);
+})();
+</script>
+</body>
+</html>
