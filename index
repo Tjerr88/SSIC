@@ -1,1292 +1,828 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>S&S + Iron Cardio — Alternating Trainer</title>
-  <style>
-    :root{
-      --bg:#0f1115; --card:#171b23; --muted:#9aa4b2; --text:#eef2f7; --line:#2a3242;
-      --accent:#7c3aed; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
-      --shadow: 0 10px 25px rgba(0,0,0,.35); --radius: 16px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background: radial-gradient(1200px 800px at 20% -10%, rgba(124,58,237,.22), transparent 60%),
-                  radial-gradient(800px 600px at 90% 0%, rgba(34,197,94,.12), transparent 55%),
-                  var(--bg);
-      color:var(--text);
-      padding:16px;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    .wrap{max-width:900px;margin:0 auto}
-    header{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap}
-    .brand h1{margin:0;font-size:18px;letter-spacing:.2px}
-    .brand p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
-    .pillrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .pill{
-      font-size:12px; color:var(--muted);
-      background: rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      padding:7px 10px; border-radius:999px;
-      display:inline-flex; gap:8px; align-items:center;
-    }
-    .dot{width:8px;height:8px;border-radius:99px;background:var(--muted)}
-    .dot.good{background:var(--good)}
-    .dot.warn{background:var(--warn)}
-    .dot.bad{background:var(--bad)}
-
-    nav{
-      position:sticky; top:10px; z-index:5;
-      display:flex; gap:10px; padding:10px;
-      background: rgba(15,17,21,.75);
-      backdrop-filter: blur(10px);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom:14px;
-    }
-    .tabbtn{
-      flex:1;
-      border:none; cursor:pointer;
-      background:transparent;
-      color:var(--muted);
-      padding:10px 10px;
-      border-radius: 12px;
-      font-weight:750;
-      letter-spacing:.2px;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .tabbtn.active{background: rgba(124,58,237,.18); color:var(--text); border:1px solid rgba(124,58,237,.28)}
-    .hide{display:none !important}
-
-    .grid{display:grid;grid-template-columns:1fr;gap:14px}
-    @media (min-width:900px){ .grid{grid-template-columns:1.2fr .8fr} }
-
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
-      padding:14px;
-      box-shadow: var(--shadow);
-    }
-    .card h2{margin:0 0 10px;font-size:14px;color:var(--text);letter-spacing:.2px}
-    .sub{color:var(--muted);font-size:12.5px;line-height:1.45;margin:0 0 10px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .hr{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
-
-    .btn{
-      border:none; cursor:pointer;
-      padding:12px 12px; border-radius: 14px;
-      font-weight:800; letter-spacing:.2px;
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      border:1px solid rgba(255,255,255,.10);
-      display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      min-height:44px;
-    }
-    .btn.primary{background: rgba(34,197,94,.16); border-color: rgba(34,197,94,.25)}
-    .btn.warn{background: rgba(245,158,11,.16); border-color: rgba(245,158,11,.25)}
-    .btn.bad{background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.25)}
-    .btn.block{width:100%}
-    .btn.small{padding:10px 10px;border-radius:12px;min-height:40px}
-
-    .tag{
-      display:inline-flex; gap:8px; align-items:center;
-      padding:7px 10px; border-radius:999px;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      color:var(--text); font-size:12px; font-weight:750;
-    }
-    .tag.muted{color:var(--muted)}
-    .tag.good{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12)}
-    .tag.warn{border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.12)}
-    .tag.bad{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12)}
-
-    details{
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: 14px;
-      background: rgba(0,0,0,.18);
-      overflow:hidden;
-    }
-    summary{
-      list-style:none;
-      cursor:pointer;
-      padding:12px;
-      font-weight:850;
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    summary::-webkit-details-marker{display:none}
-    .detailsBody{padding:0 12px 12px}
-    .hint{color:var(--muted);font-size:12px;line-height:1.4;margin:0}
-
-    .checklist{display:flex;flex-direction:column;gap:8px}
-    .lineitem{
-      display:flex; gap:10px; align-items:center; justify-content:space-between;
-      padding:10px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.20);
-    }
-    .liLeft{display:flex;flex-direction:column;gap:2px}
-    .liTitle{font-weight:850}
-    .liSub{color:var(--muted);font-size:12px}
-    .liRight{display:flex;gap:10px;align-items:center}
-    input[type="checkbox"]{transform:scale(1.2)}
-    .mono{font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1}
-    .bigtime{font-size:34px;font-weight:900;letter-spacing:.3px;line-height:1}
-
-    label{font-size:12.5px;color:var(--muted);display:block;margin-bottom:6px}
-    input[type="number"]{
-      width:100%;
-      background: rgba(0,0,0,.25);
-      border:1px solid rgba(255,255,255,.12);
-      color:var(--text);
-      border-radius: 12px;
-      padding:12px 12px;
-      outline:none;
-      min-height:44px;
-      font-size:14px;
-    }
-    .checkrow{display:flex;gap:10px;align-items:flex-start}
-    .checkrow .txt{display:flex;flex-direction:column;gap:2px}
-    .checkrow .txt b{color:var(--text);font-size:13px}
-    .checkrow .txt span{color:var(--muted);font-size:12px;line-height:1.35}
-    .callout{
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(124,58,237,.28);
-      background: rgba(124,58,237,.12);
-      color: var(--text);
-      font-size:12.5px;
-      line-height:1.45;
-    }
-    .callout.warn{border-color: rgba(245,158,11,.32); background: rgba(245,158,11,.12)}
-    .callout.good{border-color: rgba(34,197,94,.30); background: rgba(34,197,94,.10)}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>S&S + Iron Cardio — Alternating Trainer</title>
+<style>
+:root{
+  --bg:#0b0d12;
+  --card:#141826;
+  --card2:#0f1320;
+  --txt:#e9edf7;
+  --muted:#a8b0c6;
+  --line:rgba(255,255,255,.08);
+  --accent:#7c5cff;
+  --good:#32d583;
+  --bad:#ff5a67;
+  --warn:#f7b955;
+  --r:18px;
+  --shadow: 0 12px 40px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  background: radial-gradient(1200px 800px at 20% -10%, rgba(124,92,255,.18), transparent 60%),
+              radial-gradient(900px 600px at 90% 10%, rgba(50,213,131,.12), transparent 55%),
+              var(--bg);
+  color:var(--txt);
+  padding:16px 14px calc(18px + env(safe-area-inset-bottom));
+}
+h1{font-size:20px;margin:0 0 6px 0}
+p{margin:0}
+.small{font-size:12px;color:var(--muted);line-height:1.35}
+.container{max-width:740px;margin:0 auto}
+.top{
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background: linear-gradient(180deg, rgba(20,24,38,.92), rgba(15,19,32,.92));
+  box-shadow: var(--shadow);
+}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.chip{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.03);
+  border-radius:999px;
+  font-size:13px;
+}
+.dot{width:10px;height:10px;border-radius:50%;background:#637099}
+.dot.good{background:var(--good)}
+.dot.warn{background:var(--warn)}
+.dot.bad{background:var(--bad)}
+.tabs{
+  margin-top:14px;
+  display:flex;gap:8px;
+  padding:8px;
+  background: rgba(255,255,255,.03);
+  border:1px solid var(--line);
+  border-radius:20px;
+}
+.tab{
+  flex:1;
+  padding:12px 10px;
+  text-align:center;
+  border-radius:16px;
+  border:1px solid transparent;
+  color:var(--muted);
+  font-weight:650;
+  background: transparent;
+}
+.tab.active{
+  background: rgba(124,92,255,.18);
+  border-color: rgba(124,92,255,.35);
+  color:var(--txt);
+}
+.section{margin-top:14px}
+.card{
+  background: linear-gradient(180deg, rgba(20,24,38,.92), rgba(12,16,28,.92));
+  border:1px solid var(--line);
+  border-radius:22px;
+  box-shadow: var(--shadow);
+  padding:14px;
+}
+.card + .card{margin-top:12px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hr{height:1px;background:var(--line);margin:12px 0}
+.tag{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:999px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.03);
+  color:var(--muted);
+  font-size:12px;
+}
+.tag strong{color:var(--txt)}
+.kpi{
+  display:flex;gap:10px;flex-wrap:wrap;margin-top:10px
+}
+.kpi .tag{padding:9px 12px;font-size:13px}
+details{
+  border:1px solid var(--line);
+  border-radius:18px;
+  background: rgba(255,255,255,.02);
+  overflow:hidden;
+}
+details + details{margin-top:10px}
+summary{
+  list-style:none;
+  cursor:pointer;
+  padding:14px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-weight:800;
+}
+summary::-webkit-details-marker{display:none}
+.detailsBody{padding:0 14px 14px 14px}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.item{
+  display:flex;gap:10px;align-items:center;justify-content:space-between;
+  padding:10px 10px;border:1px solid var(--line);
+  border-radius:16px;background: rgba(255,255,255,.02);
+}
+.item .left{display:flex;gap:10px;align-items:center}
+.item label{display:flex;gap:10px;align-items:center;cursor:pointer}
+.item input[type="checkbox"]{width:20px;height:20px}
+.mono{font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1; letter-spacing:.5px}
+.timerBox{
+  margin-top:10px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:12px;
+  background: rgba(0,0,0,.18);
+}
+.bigTime{font-size:52px; font-weight:900; line-height:1; margin:6px 0 10px 0}
+.btnRow{display:flex;gap:10px;flex-wrap:wrap}
+button{
+  border:none;cursor:pointer;
+  padding:14px 14px;
+  border-radius:16px;
+  font-weight:800;
+  font-size:16px;
+}
+.btn{
+  background: rgba(255,255,255,.06);
+  color:var(--txt);
+  border:1px solid var(--line);
+}
+.btn.good{background: rgba(50,213,131,.16); border:1px solid rgba(50,213,131,.25)}
+.btn.bad{background: rgba(255,90,103,.14); border:1px solid rgba(255,90,103,.22)}
+.btn.warn{background: rgba(247,185,85,.16); border:1px solid rgba(247,185,85,.25)}
+.btn:active{transform: translateY(1px)}
+input[type="number"], input[type="text"], select{
+  width:100%;
+  padding:12px 12px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.03);
+  color: var(--txt);
+  outline:none;
+  font-size:15px;
+}
+.grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:12px;
+}
+@media(min-width:720px){
+  body{padding:18px}
+  h1{font-size:22px}
+  .grid{grid-template-columns: 1fr 1fr}
+}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <h1>S&S + Iron Cardio — Alternating Trainer</h1>
-      <p>IC kiest automatisch <b>duur</b> + <b>versie</b> en herhaalt nooit dezelfde als vorige IC sessie. Timer loopt door bij app-switch.</p>
+<div class="container">
+  <div class="top">
+    <h1>S&amp;S + Iron Cardio — Alternating Trainer</h1>
+    <p class="small">S&amp;S: microcyclus = 5 S&amp;S sessies. Alleen sessie <strong>#3</strong> is Timed (S−). Step-cycle: elke 3 microcycli (=15 S&amp;S sessies) schuift S+ 1 set per kant omhoog (0/2/4/6/8).<br/>IC: 4 dobbelstenen: Sessietype → Tijd → Load → Variatie (alleen waar opties bestaan). Heavy–Easy is altijd Clean + Push Press + Goblet Squat.</p>
+    <div class="chips">
+      <div class="chip"><span class="dot" id="dotWake"></span><span id="chipWake">Wake lock: uit</span></div>
+      <div class="chip"><span class="dot good"></span><span id="chipToday">Vandaag: —</span></div>
+      <div class="chip"><span class="dot"></span><span id="chipIC">IC: —</span></div>
     </div>
-    <div class="pillrow">
-      <span class="pill"><span id="wlDot" class="dot"></span><span class="mono" id="wlText">Wake lock: uit</span></span>
-      <span class="pill"><span class="dot good"></span><span class="mono" id="todayPill">Vandaag: —</span></span>
-      <span class="pill"><span class="dot"></span><span class="mono" id="icPill">IC: —</span></span>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="today">Vandaag</button>
+      <button class="tab" data-tab="settings">Settings</button>
+      <button class="tab" data-tab="history">History</button>
     </div>
-  </header>
+  </div>
 
-  <nav>
-    <button class="tabbtn active" data-tab="today">Vandaag</button>
-    <button class="tabbtn" data-tab="settings">Settings</button>
-    <button class="tabbtn" data-tab="history">History</button>
-  </nav>
+  <section class="section" id="tab-today">
+    <div class="card">
+      <div class="kpi" id="todayTags"></div>
 
-  <section id="tab-today">
-    <div class="grid">
-      <div class="card">
+      <details id="accWarm" open>
+        <summary><span>Warm-up (3 rondes)</span><span class="tag">dicht</span></summary>
+        <div class="detailsBody">
+          <div class="small">3 rondes, rustig ademend. Geen haast.</div>
+          <div class="list">
+            <div class="item"><div class="left">• Prying squat</div></div>
+            <div class="item"><div class="left">• Halo (links/rechts)</div></div>
+            <div class="item"><div class="left">• Hip bridge</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details id="accMain1">
+        <summary><span id="main1Title">Swings</span><span class="tag">dicht</span></summary>
+        <div class="detailsBody">
+          <div class="small" id="main1Sub">—</div>
+          <div class="list" id="main1List"></div>
+        </div>
+      </details>
+
+      <details id="accMain2">
+        <summary><span id="main2Title">Get-ups</span><span class="tag">dicht</span></summary>
+        <div class="detailsBody">
+          <div class="small" id="main2Sub">—</div>
+          <div class="list" id="main2List"></div>
+        </div>
+      </details>
+
+      <details id="accIC" style="display:none">
+        <summary><span>Iron Cardio</span><span class="tag">dicht</span></summary>
+        <div class="detailsBody">
+          <div class="small" id="icSummary">—</div>
+          <div class="hr"></div>
+          <div class="row">
+            <span class="tag"><strong>Sets</strong> <span class="mono" id="icSets">0</span></span>
+            <button class="btn" id="btnIcMinus">−</button>
+            <button class="btn" id="btnIcPlus">+</button>
+          </div>
+        </div>
+      </details>
+
+      <div class="hr"></div>
+
+      <div class="timerBox">
         <div class="row" style="justify-content:space-between">
-          <span id="tagProgram" class="tag">—</span>
-          <span id="tagVariant" class="tag muted">—</span>
-          <span id="tagDuration" class="tag muted">—</span>
+          <span class="tag" id="timerModeTag">Timer</span>
+          <span class="tag"><strong>Status</strong> <span id="statusText">klaar</span></span>
         </div>
-        <p class="sub" id="todaySubtitle">—</p>
+        <div class="bigTime mono" id="timeDisplay">00:00</div>
+        <div class="small" id="timerHint">—</div>
+        <div class="btnRow" style="margin-top:12px">
+          <button class="btn good" id="btnStart">Start</button>
+          <button class="btn" id="btnPause">Pauze</button>
+          <button class="btn bad" id="btnComplete">Complete</button>
+        </div>
+      </div>
 
-        <div id="ssBlock">
-          <details id="warmDetails">
-            <summary>
-              <span>Warm-up (3 rondes)</span>
-              <span class="tag muted">dicht</span>
-            </summary>
-            <div class="detailsBody">
-              <div class="checklist" id="warmList"></div>
-              <p class="hint" style="margin-top:10px">5 reps per oefening. Rust kort. Focus op “openen”, niet “slopen”.</p>
+      <details id="accCool">
+        <summary><span>Cooling down</span><span class="tag">dicht</span></summary>
+        <div class="detailsBody">
+          <div class="small">1 minuut per kant: 90/90 + 1 minuut per kant straddle.</div>
+          <div class="timerBox" style="margin-top:10px">
+            <div class="row" style="justify-content:space-between">
+              <span class="tag">Cooling timer</span>
+              <span class="tag"><strong>Status</strong> <span id="coolStatus">klaar</span></span>
             </div>
-          </details>
-
-          <div class="hr"></div>
-
-          <h2>Swings</h2>
-          <p class="sub" id="swSub">—</p>
-          <div class="checklist" id="swList"></div>
-
-          <div class="hr"></div>
-
-          <h2>Get-ups</h2>
-          <p class="sub" id="guSub">—</p>
-          <div class="checklist" id="guList"></div>
-        </div>
-
-        <div id="icBlock" class="hide">
-          <div class="callout good" id="icSummary" style="margin-bottom:12px"></div>
-          <h2>Iron Cardio – sessie</h2>
-          <p class="sub" id="icMovesSub">—</p>
-          <div class="checklist" id="icMovesList"></div>
-          <div class="hr"></div>
-        </div>
-
-        <h2>Timer</h2>
-        <div class="row" style="justify-content:space-between;align-items:flex-end">
-          <div>
-            <div class="sub" style="margin:0" id="timerLabel">Stopwatch</div>
-            <div class="mono bigtime" id="timeMain">00:00</div>
-            <div class="tag muted" id="timeSub">—</div>
-          </div>
-          <div class="row">
-            <button class="btn small" id="btnMinus">−</button>
-            <span class="tag muted"><span class="mono" id="checksDone">0</span>/<span class="mono" id="checksGoal">0</span> checks</span>
-            <button class="btn small" id="btnPlus">+</button>
+            <div class="bigTime mono" id="coolTime">00:00</div>
+            <div class="btnRow" style="margin-top:12px">
+              <button class="btn good" id="btnCoolStart">Start</button>
+              <button class="btn" id="btnCoolPause">Pauze</button>
+              <button class="btn warn" id="btnCoolReset">Reset</button>
+            </div>
           </div>
         </div>
+      </details>
 
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary block" id="btnStart">Start (wake lock)</button>
-          <button class="btn warn block" id="btnPause">Pauze</button>
-          <button class="btn bad block" id="btnComplete">Complete & opslaan</button>
-        </div>
-        <p class="hint" style="margin-top:10px" id="timerHint">IC gebruikt countdown met dubbele beep op 0.</p>
-
-        <div class="hr"></div>
-
-        <h2>Cooling down</h2>
-        <p class="sub">1 minuut per kant: 90/90 + Straddle.</p>
-        <div class="row" style="justify-content:space-between;align-items:flex-end">
-          <div>
-            <div class="sub" style="margin:0">Cooling timer</div>
-            <div class="mono bigtime" id="cdTime">00:00</div>
-            <div class="tag muted" id="cdStep">—</div>
-          </div>
-          <div class="row">
-            <button class="btn primary" id="btnCdStart">Start</button>
-            <button class="btn" id="btnCdReset">Reset</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Vandaag in 10 seconden</h2>
-        <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">
-          <span class="tag muted" id="sumKey">—</span>
-          <span class="tag muted" id="sumRule">—</span>
-        </div>
-
-        <div class="callout warn" id="icRuleBox" style="display:none"></div>
-
-        <div class="hr"></div>
-
-        <h2>Status</h2>
-        <p class="sub" id="statusText">—</p>
-        <button class="btn block" id="btnResetSession">Reset huidige sessie</button>
-      </div>
     </div>
   </section>
 
-  <section id="tab-settings" class="hide">
-    <div class="grid">
-      <div class="card">
-        <h2>Programma selectie</h2>
-        <p class="sub">Als beide aan staan: om-en-om per afgeronde sessie.</p>
-
-        <div class="checkrow">
-          <input type="checkbox" id="toggleSS">
-          <div class="txt">
-            <b>Simple &amp; Sinister</b>
-            <span>Warm-up + swings + get-ups + cooling.</span>
-          </div>
+  <section class="section" id="tab-settings" style="display:none">
+    <div class="card">
+      <h2 style="margin:4px 0 10px 0;font-size:18px">Programma</h2>
+      <div class="grid">
+        <div>
+          <label class="small">S&amp;S aan</label>
+          <select id="setEnableSS">
+            <option value="1">Aan</option>
+            <option value="0">Uit</option>
+          </select>
         </div>
-        <div style="height:10px"></div>
-        <div class="checkrow">
-          <input type="checkbox" id="toggleIC">
-          <div class="txt">
-            <b>Iron Cardio</b>
-            <span>Auto IC duur + versie. Geen herhaling van vorige IC.</span>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <h2>Simple &amp; Sinister settings</h2>
-        <div style="max-width:320px">
-          <label>S-gewicht (S) — standaard bell (kg)</label>
-          <input type="number" id="inpS" min="4" step="4" />
-          <p class="hint">S+ = S+8. S− = S−8.</p>
-        </div>
-
-        <div style="height:10px"></div>
-        <div class="checkrow">
-          <input type="checkbox" id="toggleTimed">
-          <div class="txt">
-            <b>Timed S&amp;S aan</b>
-            <span>Timed gebruikt altijd volledig S− gewicht.</span>
-          </div>
-        </div>
-
-        <div style="height:10px"></div>
-        <div class="checkrow">
-          <input type="checkbox" id="toggleTwoArmEvery3">
-          <div class="txt">
-            <b>Elke 3e S&amp;S sessie: two-arm swings</b>
-            <span>Geldt ook als het een Timed sessie is.</span>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <h2>Iron Cardio options</h2>
-        <p class="sub">Als een optie uit staat, vervangt de app die rode variant door “Heavy Classic”.</p>
-
-        <div class="checkrow">
-          <input type="checkbox" id="toggleICPullup">
-          <div class="txt">
-            <b>Rood: Pull-up variant toegestaan</b>
-            <span>Classic + Pull-up (4 moves).</span>
-          </div>
-        </div>
-        <div style="height:10px"></div>
-        <div class="checkrow">
-          <input type="checkbox" id="toggleICDouble">
-          <div class="txt">
-            <b>Rood: Double kettlebell variant toegestaan</b>
-            <span>Classic++ met 2 kettlebells (exposure).</span>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="row">
-          <button class="btn primary" id="btnSaveSettings">Opslaan</button>
-          <button class="btn" id="btnRecalc">Herbereken “Vandaag”</button>
-          <button class="btn bad" id="btnFactory">Factory reset</button>
+        <div>
+          <label class="small">Iron Cardio aan</label>
+          <select id="setEnableIC">
+            <option value="1">Aan</option>
+            <option value="0">Uit</option>
+          </select>
         </div>
       </div>
 
-      <div class="card">
-        <h2>Preview vandaag</h2>
-        <div class="row" style="gap:8px;flex-wrap:wrap">
-          <span class="tag" id="prevProgram">—</span>
-          <span class="tag muted" id="prevVar">—</span>
-          <span class="tag muted" id="prevDur">—</span>
+      <div class="hr"></div>
+
+      <h2 style="margin:4px 0 10px 0;font-size:18px">S&amp;S settings</h2>
+      <div class="grid">
+        <div>
+          <label class="small">S (standaard bell, kg)</label>
+          <input type="number" id="ssBell" min="8" step="4" value="24"/>
         </div>
-        <div class="hr"></div>
-        <div class="callout">
-          <b>IC duur + kleur</b><br>
-          • 1–2 → 20 min (oranje)<br>
-          • 3–4–5 → 30 min (groen)<br>
-          • 6 → 40 min (rood)<br><br>
-          <b>No-repeat</b><br>
-          IC duur en IC versie mogen nooit gelijk zijn aan de vorige IC sessie.
+        <div>
+          <label class="small">S+ (kg) (default = S+8)</label>
+          <input type="number" id="ssBellPlus" min="8" step="4" value="32"/>
         </div>
       </div>
+      <div class="grid" style="margin-top:10px">
+        <div>
+          <label class="small">Elke 3e S&amp;S sessie = two-hand swing</label>
+          <select id="twoArmEveryThird">
+            <option value="1">Aan</option>
+            <option value="0">Uit</option>
+          </select>
+        </div>
+        <div>
+          <label class="small">Timed label tonen als S&lt;32 (slot #3 blijft)</label>
+          <select id="timedVisible">
+            <option value="1">Ja</option>
+            <option value="0">Nee</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <h2 style="margin:4px 0 10px 0;font-size:18px">IC load settings</h2>
+      <div class="grid">
+        <div>
+          <label class="small">IC Easy load (kg)</label>
+          <input type="number" id="icEasy" min="8" step="4" value="16"/>
+        </div>
+        <div>
+          <label class="small">IC Medium load (kg)</label>
+          <input type="number" id="icMed" min="8" step="4" value="20"/>
+        </div>
+        <div>
+          <label class="small">IC Heavy load (kg)</label>
+          <input type="number" id="icHeavy" min="8" step="4" value="24"/>
+        </div>
+        <div>
+          <label class="small">Double bell beschikbaar?</label>
+          <select id="icDoubleOK">
+            <option value="1">Ja</option>
+            <option value="0">Nee</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn warn" id="btnResetAll">Reset alle data</button>
+      </div>
+      <p class="small" style="margin-top:10px">Reset wist localStorage (history + counters).</p>
     </div>
   </section>
 
-  <section id="tab-history" class="hide">
-    <div class="grid" style="grid-template-columns:1fr">
-      <div class="card">
-        <h2>History</h2>
-        <p class="sub">Complete = slaat tijd + variant op.</p>
-        <div class="row" style="margin-bottom:10px">
-          <button class="btn" id="btnExport">Export JSON</button>
-          <button class="btn" id="btnImport">Import JSON</button>
-          <button class="btn bad" id="btnClearHistory">Wis history</button>
-        </div>
-        <div id="historyList" class="checklist"></div>
-        <p class="hint" id="historyEmpty" style="margin-top:10px">Nog geen sessies opgeslagen.</p>
-      </div>
+  <section class="section" id="tab-history" style="display:none">
+    <div class="card">
+      <h2 style="margin:4px 0 10px 0;font-size:18px">History</h2>
+      <div class="small">Laatste sessies (Complete).</div>
+      <div class="hr"></div>
+      <div id="histList" class="list"></div>
     </div>
   </section>
 
 </div>
 
 <script>
-(() => {
-  const LS_KEY = "ss_ic_alt_v1";
-  const now = () => Date.now();
-  const isoToday = () => new Date().toISOString().slice(0,10);
-  const pad2 = (n) => String(n).padStart(2,"0");
-  const msToHMS = (ms) => {
-    ms = Math.max(0, ms|0);
-    const s = Math.floor(ms/1000);
-    const h = Math.floor(s/3600);
-    const m = Math.floor((s%3600)/60);
-    const r = s%60;
-    return h>0 ? `${h}:${pad2(m)}:${pad2(r)}` : `${pad2(m)}:${pad2(r)}`;
-  };
-  const msToMMSS = (ms) => {
-    ms = Math.max(0, ms|0);
-    const s = Math.floor(ms/1000);
-    const m = Math.floor(s/60);
-    const r = s%60;
-    return `${pad2(m)}:${pad2(r)}`;
-  };
-  const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
-  const roundTo4 = (kg)=>{
-    const r = Math.round((Number(kg)||0)/4)*4;
-    return Math.max(4, r||24);
-  };
+const LS_KEY = "SS_IC_APP_matrix_v1";
+const pad2 = n => String(n).padStart(2,"0");
+const isoToday = () => { const d=new Date(); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; };
+const fmtMs = (ms) => { ms=Math.max(0,Math.floor(ms)); const s=Math.floor(ms/1000); return `${pad2(Math.floor(s/60))}:${pad2(s%60)}`; };
+const randDie = () => 1 + Math.floor(Math.random()*6);
+const safeInt = (v,f)=>{ const n=parseInt(v,10); return Number.isFinite(n)?n:f; };
+const clamp4 = (n)=>{ n=Math.floor(n/4)*4; return Math.max(8,n); };
 
-  // Audio: double beep
-  let audioCtx = null;
-  function ensureAudio(){
-    if(!audioCtx){
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if(audioCtx.state === "suspended") audioCtx.resume();
-  }
-  function beep(durationMs=120, freq=880, gain=0.08){
-    try{
-      ensureAudio();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.frequency.value = freq;
-      o.type = "sine";
-      g.gain.value = gain;
-      o.connect(g); g.connect(audioCtx.destination);
-      o.start();
-      o.stop(audioCtx.currentTime + durationMs/1000);
-    }catch(e){}
-  }
-  function doubleBeep(){
-    beep(120, 880, 0.08);
-    setTimeout(()=>beep(140, 660, 0.08), 180);
-  }
+function beepDouble(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const mk=(t)=>{ const o=ctx.createOscillator(); const g=ctx.createGain(); o.connect(g); g.connect(ctx.destination);
+      o.type="sine"; o.frequency.value=880; g.gain.value=0.0001;
+      g.gain.exponentialRampToValueAtTime(0.15, t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+0.18);
+      o.start(t); o.stop(t+0.19);
+    };
+    const t=ctx.currentTime;
+    mk(t); mk(t+0.30);
+  }catch(e){}
+}
 
-  const defaultState = () => ({
+function defaultState(){
+  return {
     settings:{
-      enableSS:true,
-      enableIC:false,
-      S:24,
-      timedEnabled:true,
-      twoArmEvery3:true,
-      icAllowPullup:true,
-      icAllowDouble:true
+      enableSS:true, enableIC:true,
+      ssBell:24, ssBellPlus:32,
+      twoArmEveryThird:true, timedVisible:true,
+      icEasy:16, icMed:20, icHeavy:24,
+      icDoubleOK:true
     },
+    counters:{ ssCounter:0 },
     session:{
       todayDate: isoToday(),
-      programPlanned: "SS",
-      variantId: null,
-      variantLabel: null,
-      durationMin: null,
-      ss:{ timed:false, twoArm:false, S:24, Splus:32, Sminus:16 },
-      ic:{ color:null, roll:null, innerRoll:null, textLines:[] },
-      startedAt:null,
-      paused:false,
-      pausedAt:null,
-      totalPausedMs:0,
-      active:false,
-      countdownTotalMs:null,
-      countdownDone:false,
-      checksDone:0,
-      checksGoal:0,
-      checks:{}
+      programPlanned:null,
+      ss:null, ic:null,
+      checks:{}, icSets:0,
+      startedAt:null, paused:false, pausedAt:null, totalPausedMs:0,
+      icCountdownMs:null, icDoneBeep:false,
+      coolStartedAt:null, coolPaused:false, coolPausedAt:null, coolTotalPausedMs:0
     },
-    _lastPlanKey:null,
     history:[]
-  });
-
-  const merge = (base,incoming)=>{
-    const out = Array.isArray(base)? base.slice(): {...base};
-    for(const k in incoming){
-      const bv = base?.[k], iv = incoming[k];
-      if(iv && typeof iv==="object" && !Array.isArray(iv) && bv && typeof bv==="object" && !Array.isArray(bv)){
-        out[k]=merge(bv,iv);
-      }else{
-        out[k]=iv;
-      }
-    }
-    return out;
   };
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw) return defaultState();
+    const st=JSON.parse(raw);
+    if(!st.settings) return defaultState();
+    st.settings.enableSS=!!st.settings.enableSS;
+    st.settings.enableIC=!!st.settings.enableIC;
+    st.settings.twoArmEveryThird=!!st.settings.twoArmEveryThird;
+    st.settings.timedVisible=(st.settings.timedVisible!==false);
+    st.settings.icDoubleOK=(st.settings.icDoubleOK!==false);
+    st.counters ||= {ssCounter:0};
+    st.session ||= defaultState().session;
+    st.history ||= [];
+    return st;
+  }catch(e){ return defaultState(); }
+}
+let state = load();
+const save=()=>localStorage.setItem(LS_KEY, JSON.stringify(state));
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+const nowMs=()=>Date.now();
 
-  const load = ()=>{
-    try{
-      const raw = localStorage.getItem("ss_ic_alt_v1");
-      if(!raw) return defaultState();
-      return merge(defaultState(), JSON.parse(raw));
-    }catch(e){ return defaultState(); }
-  };
-
-  let state = load();
-  const save = ()=> localStorage.setItem("ss_ic_alt_v1", JSON.stringify(state));
-
-  // Tabs
-  const tabBtns = document.querySelectorAll(".tabbtn");
-  const tabEls = {
-    today: document.getElementById("tab-today"),
-    settings: document.getElementById("tab-settings"),
-    history: document.getElementById("tab-history"),
-  };
-  tabBtns.forEach(b=>b.addEventListener("click", ()=>{
-    tabBtns.forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    const t = b.dataset.tab;
-    Object.keys(tabEls).forEach(k => tabEls[k].classList.toggle("hide", k!==t));
-    if(t==="today") renderToday();
-    if(t==="settings") renderSettings();
-    if(t==="history") renderHistory();
-  }));
-
-  // Wake lock
-  let wakeLock = null;
-  const wlDot = document.getElementById("wlDot");
-  const wlText = document.getElementById("wlText");
-  const setWakeUI = (on)=>{
-    wlDot.className = "dot " + (on ? "good" : "");
-    wlText.textContent = on ? "Wake lock: aan" : "Wake lock: uit";
-  };
-  async function requestWakeLock(){
-    if(!("wakeLock" in navigator)){ setWakeUI(false); return; }
-    try{
-      wakeLock = await navigator.wakeLock.request("screen");
-      setWakeUI(true);
-      wakeLock.addEventListener("release", ()=> setWakeUI(false));
-    }catch(e){ setWakeUI(false); }
-  }
-  async function releaseWakeLock(){
-    try{ if(wakeLock){ await wakeLock.release(); wakeLock=null; } }catch(e){}
-    setWakeUI(false);
-  }
-  document.addEventListener("visibilitychange", async ()=>{
-    if(document.visibilityState==="visible" && state.session.active){
-      await requestWakeLock();
-    }
-  });
-
-  // History helpers
-  function lastCompletedProgram(){
-    if(!state.history.length) return null;
-    return state.history[state.history.length-1].program;
-  }
-  function lastIC(){
-    for(let i=state.history.length-1;i>=0;i--){
-      if(state.history[i].program==="IC") return state.history[i];
-    }
-    return null;
-  }
-
-  // Planning: choose SS vs IC
-  function planProgram(){
-    const s = state.settings;
-    const ssOn = !!s.enableSS;
-    const icOn = !!s.enableIC;
-    let planned = "SS";
-    if(ssOn && !icOn) planned="SS";
-    else if(!ssOn && icOn) planned="IC";
-    else if(ssOn && icOn){
-      const last = lastCompletedProgram();
-      planned = (last==="SS") ? "IC" : "SS";
-      if(!last) planned="SS";
+let wakeLock=null;
+async function setWake(on){
+  try{
+    if(on){
+      if('wakeLock' in navigator){ wakeLock=await navigator.wakeLock.request('screen'); }
     }else{
-      planned="SS";
+      if(wakeLock){ await wakeLock.release(); wakeLock=null; }
     }
-    state.session.programPlanned = planned;
-  }
+  }catch(e){}
+  renderChips();
+}
 
-  // S&S planning
-  function planSS(){
-    const S = roundTo4(state.settings.S);
-    const Splus = S + 8;
-    const Sminus = Math.max(4, S - 8);
+function getLastCompleted(){
+  const h=state.history;
+  return h.length ? h[h.length-1] : null;
+}
 
-    const ssCount = state.history.filter(x => x.program==="SS").length;
-    const nextSsIndex = ssCount + 1;
-    const twoArm = state.settings.twoArmEvery3 ? (nextSsIndex % 3 === 0) : false;
-    const timed = !!state.settings.timedEnabled;
+function buildSS(){
+  const ssCount=state.counters.ssCounter||0;
+  const microIndex=(ssCount%5)+1;
+  const timed=(microIndex===3);
+  const stepIdx=Math.floor(ssCount/15)%5;
+  const sPlusSets=[0,2,4,6,8][stepIdx];
+  const S=clamp4(state.settings.ssBell||24);
+  const Splus=clamp4(state.settings.ssBellPlus|| (S+8));
+  const Sminus=clamp4(Math.max(8,S-8));
+  const twoArm=state.settings.twoArmEveryThird ? (((ssCount+1)%3)===0) : false;
+  state.session.ss={microIndex,timed,sPlusSets,S,Splus,Sminus,twoArm};
+  state.session.ic=null;
+  state.session.icCountdownMs=null;
+  state.session.icDoneBeep=false;
+}
 
-    state.session.ss = { timed, twoArm, S, Splus, Sminus };
-  }
+function chooseICOnce(){
+  const a=randDie();
+  const sessionType=(a<=2)?"Easy":(a<=5?"Medium":"Hard");
+  const b=randDie();
+  const timeMin=(b<=2)?15:(b<=5?20:30);
+  const c=randDie();
+  const loadLevel=(c<=2)?"Easy":(c<=5?"Medium":"Heavy");
+  const loadKg=clamp4(loadLevel==="Easy"?state.settings.icEasy:(loadLevel==="Medium"?state.settings.icMed:state.settings.icHeavy));
+  const cellKey=`${sessionType}_${loadLevel}`;
+  const d=randDie();
 
-  // IC planning
-  function rollD6(){ return Math.floor(Math.random()*6)+1; }
-  function icFromRoll(roll){
-    if(roll<=2) return {color:"ORANGE", duration:20};
-    if(roll<=5) return {color:"GREEN", duration:30};
-    return {color:"RED", duration:40};
-  }
-  function icVariant(color, innerRoll, opts){
-    const bucket = (innerRoll===6) ? "TERT" : (innerRoll<=2 ? "SEC" : "PRI");
+  let variantKey="FIXED", variantText="";
 
-    if(color==="GREEN"){
-      if(bucket==="PRI") return {id:"IC_GREEN_CLASSIC", label:"Groen • Classic (single bell)", lines:[
-        "Classic: 1 clean • 1 press • 1 squat",
-        "Ademhaling leidt. Submax. Perfect reps."
-      ]};
-      if(bucket==="SEC") return {id:"IC_GREEN_T2", label:"Groen • Traveling 2’s", lines:[
-        "Traveling 2’s: 2 clean • 2 press • 2 squat (per kant)",
-        "Wissel kant na elke mini-blok."
-      ]};
-      return {id:"IC_GREEN_ALTWT", label:"Groen • Alternating weight", lines:[
-        "Alternating weight: licht ↔ medium bell",
-        "Zelfde reps als Classic (1–1–1)."
-      ]};
-    }
-
-    if(color==="ORANGE"){
-      if(bucket==="PRI") return {id:"IC_ORANGE_PRESSLADDER", label:"Oranje • Press ladder (1–2–3)", lines:[
-        "Press ladder: 1–2–3 press",
-        "Met singles: 1 clean + 1 squat (tussen ladders)."
-      ]};
-      if(bucket==="SEC") return {id:"IC_ORANGE_REPLADDER", label:"Oranje • Rep ladder (clean/press/squat)", lines:[
-        "Rep ladder (advanced):",
-        "1–2–3 clean • 1 press • 1 squat",
-        "1 clean • 1–2–3 press • 1 squat",
-        "1 clean • 1 press • 1–2–3 squat"
-      ]};
-      return {id:"IC_ORANGE_WEIGHTLADDER", label:"Oranje • Weight ladder", lines:[
-        "Weight ladder: zelfde reps, oplopend gewicht",
-        "Rust volledig tussen wissels."
-      ]};
-    }
-
-    if(color==="RED"){
-      if(bucket==="TERT"){
-        if(opts.allowDouble){
-          return {id:"IC_RED_DOUBLEBELL", label:"Rood • Classic++ (Double kettlebell)", lines:[
-            "2 KB: clean • press • squat (singles/doubles)",
-            "Exposure only. Volledig herstel tussen sets."
-          ]};
-        }else{
-          return {id:"IC_RED_HEAVYCLASSIC_DB_OFF", label:"Rood • Heavy Classic (double bell uit)", lines:[
-            "Heavy Classic: 1 clean • 1 press • 1 squat",
-            "Double bell optie staat uit → fallback."
-          ]};
-        }
-      }
-      if(bucket==="PRI"){
-        return {id:"IC_RED_SNATCHPLUS", label:"Rood • Classic + Snatch (4 moves)", lines:[
-          "Per set:",
-          "1 snatch • 1 press • 1 squat • 1 clean",
-          "Singles only. Geen ladders. Geen time pressure."
-        ]};
-      }
-      if(opts.allowPullup){
-        return {id:"IC_RED_PULLUPPLUS", label:"Rood • Classic + Pull-up (4 moves)", lines:[
-          "Per set:",
-          "1 clean • 1 pull-up (1–2 reps) • 1 press • 1 squat",
-          "Submax. Ademhaling leidt."
-        ]};
-      }else{
-        return {id:"IC_RED_HEAVYCLASSIC_PU_OFF", label:"Rood • Heavy Classic (pull-up uit)", lines:[
-          "Heavy Classic: 1 clean • 1 press • 1 squat",
-          "Pull-up optie staat uit → fallback."
-        ]};
-      }
-    }
-
-    return {id:"IC_UNKNOWN", label:"IC", lines:[]};
-  }
-
-  function chooseICSession(){
-    const prev = lastIC();
-    const prevDur = prev ? prev.durationMin : None;
-    const prevVar = prev ? prev.variantId : None;
-    const opts = { allowPullup: !!state.settings.icAllowPullup, allowDouble: !!state.settings.icAllowDouble };
-
-    let best = null;
-    for(let tries=0; tries<40; tries++){
-      const r = rollD6();
-      const base = icFromRoll(r);
-      if(prev && base.duration === prev.durationMin) continue;
-
-      const inner = rollD6();
-      const v = icVariant(base.color, inner, opts);
-      if(prev && v.id === prev.variantId) continue;
-
-      best = { roll:r, color:base.color, duration:base.duration, innerRoll:inner, variant:v };
-      break;
-    }
-
-    if(!best){
-      const prevD = prev ? prev.durationMin : null;
-      const candidates = [20,30,40].filter(x => x !== prevD);
-      const duration = candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : 30;
-      const color = (duration===20) ? "ORANGE" : (duration===30 ? "GREEN" : "RED");
-      const poolInner = [2,4,6];
-      let chosenVar = null, chosenInner = 4;
-      for(const inner of poolInner){
-        const v = icVariant(color, inner, opts);
-        if(!prev || v.id !== prev.variantId){ chosenVar=v; chosenInner=inner; break; }
-      }
-      if(!chosenVar){
-        chosenVar = icVariant(color, 4, opts);
-        chosenInner = 4;
-      }
-      best = { roll:0, color, duration, innerRoll: chosenInner, variant: chosenVar };
-    }
-
-    state.session.durationMin = best.duration;
-    state.session.variantId = best.variant.id;
-    state.session.variantLabel = best.variant.label;
-    state.session.ic = { color: best.color, roll: best.roll, innerRoll: best.innerRoll, textLines: best.variant.lines };
-  }
-
-  function planToday(){
-    const todayISO = isoToday();
-    if(state.session.todayDate !== todayISO){
-      state.session.todayDate = todayISO;
-      state.session.startedAt=null;
-      state.session.paused=false;
-      state.session.pausedAt=null;
-      state.session.totalPausedMs=0;
-      state.session.active=false;
-      state.session.countdownDone=false;
-      state.session.countdownTotalMs=null;
-      state.session.checks = {};
-      state.session.checksDone = 0;
-      state.session.checksGoal = 0;
-    }
-
-    planProgram();
-
-    if(state.session.programPlanned==="SS"){
-      planSS();
-      state.session.durationMin = null;
-      state.session.variantId = "SS";
-      state.session.variantLabel = state.session.ss.timed ? "S&S (Timed S−)" : "S&S (Practice)";
-      state.session.countdownTotalMs = null;
+  if(sessionType==="Easy" && loadLevel==="Heavy"){
+    variantKey="HEAVY_EASY_FIXED";
+    variantText="Clean • Push Press • Goblet Squat (vast)";
+  }else if(sessionType==="Hard" && loadLevel==="Easy"){
+    if(!state.settings.icDoubleOK){
+      variantKey=(d<=2)?"SB_CLASSIC_SNATCH":(d<=5?"TRAVELING_2S":"MOVING_TARGET");
+      variantText=(variantKey==="SB_CLASSIC_SNATCH")?"Classic + Snatch":(variantKey==="TRAVELING_2S"?"Traveling 2's":"Moving Target");
     }else{
-      chooseICSession();
-      state.session.countdownTotalMs = state.session.durationMin * 60 * 1000;
+      variantKey=(d<=2)?"DB_CLASSIC":(d<=5?"DB_CLASSIC_SNATCH":"DB_SFG2");
+      variantText=(variantKey==="DB_CLASSIC")?"Double Bell Classic":(variantKey==="DB_CLASSIC_SNATCH"?"Double Classic + Snatch":"Double Bell SFG II (Press → Push Press → Jerk)");
     }
-
-    const planKey = `${state.session.programPlanned}|${state.session.variantId}|${state.session.durationMin||""}`;
-    if(state._lastPlanKey !== planKey){
-      state.session.checks = {};
-      state.session.checksDone = 0;
-      state.session.countdownDone=false;
-      state._lastPlanKey = planKey;
-    }
-
-    save();
+  }else if(sessionType==="Medium"){
+    variantKey=(d<=2)?"PRESS_LADDER":(d<=5?"WEIGHT_LADDER":"SFG1");
+    variantText=(variantKey==="PRESS_LADDER")?"Press ladder":(variantKey==="WEIGHT_LADDER"?"Weight ladder":"SFG I");
+  }else if(sessionType==="Hard"){
+    variantKey=(d<=2)?"CLASSIC_SNATCH":(d<=5?"TRAVELING_2S":"MOVING_TARGET");
+    variantText=(variantKey==="CLASSIC_SNATCH")?"Classic + Snatch":(variantKey==="TRAVELING_2S"?"Traveling 2's":"Moving Target");
+  }else{
+    variantKey="CLASSIC";
+    variantText="Classic (Clean • Press • Squat)";
   }
 
-  // UI refs
-  const todayPill = document.getElementById("todayPill");
-  const icPill = document.getElementById("icPill");
-  const tagProgram = document.getElementById("tagProgram");
-  const tagVariant = document.getElementById("tagVariant");
-  const tagDuration = document.getElementById("tagDuration");
-  const todaySubtitle = document.getElementById("todaySubtitle");
-  const ssBlock = document.getElementById("ssBlock");
-  const icBlock = document.getElementById("icBlock");
-  const icSummary = document.getElementById("icSummary");
-  const icMovesSub = document.getElementById("icMovesSub");
-  const icMovesList = document.getElementById("icMovesList");
-  const icRuleBox = document.getElementById("icRuleBox");
-  const warmList = document.getElementById("warmList");
-  const swList = document.getElementById("swList");
-  const guList = document.getElementById("guList");
-  const swSub = document.getElementById("swSub");
-  const guSub = document.getElementById("guSub");
-  const timerLabel = document.getElementById("timerLabel");
-  const timeMain = document.getElementById("timeMain");
-  const timeSub = document.getElementById("timeSub");
-  const statusText = document.getElementById("statusText");
-  const timerHint = document.getElementById("timerHint");
-  const checksDoneEl = document.getElementById("checksDone");
-  const checksGoalEl = document.getElementById("checksGoal");
-  const sumKey = document.getElementById("sumKey");
-  const sumRule = document.getElementById("sumRule");
+  return {die:{a,b,c,d}, sessionType, timeMin, loadLevel, loadKg, cellKey, variantKey, variantText};
+}
 
-  // checklists
-  function renderWarm(){
-    const items = [
-      {title:"Prying Goblet Squat", sub:"5 reps • 3 rondes"},
-      {title:"Halo", sub:"5 links + 5 rechts • 3 rondes"},
-      {title:"StrongFirst Hip Bridge", sub:"5 reps • 3 rondes"},
-    ];
-    warmList.innerHTML="";
-    items.forEach(it=>{
-      const div=document.createElement("div");
-      div.className="lineitem";
-      div.innerHTML = `
-        <div class="liLeft">
-          <div class="liTitle">${it.title}</div>
-          <div class="liSub">${it.sub}</div>
-        </div>
-      `;
-      warmList.appendChild(div);
-    });
-    document.getElementById("warmDetails").open = false;
+function buildIC(){
+  const last=getLastCompleted();
+  const lastIC=(last && last.program==="IC")? last : null;
+  const lastTime=lastIC ? lastIC.ic?.timeMin : null;
+  const lastVar=lastIC ? lastIC.ic?.variantKey : null;
+
+  let pick=null;
+  for(let i=0;i<25;i++){
+    const cand=chooseICOnce();
+    if((lastTime!=null && cand.timeMin===lastTime) || (lastVar!=null && cand.variantKey===lastVar)) continue;
+    pick=cand; break;
   }
-  const keyFor = (kind, idx)=> `${kind}-${idx}`;
+  if(!pick) pick=chooseICOnce();
+  state.session.ic=pick;
+  state.session.ss=null;
+  state.session.icCountdownMs=pick.timeMin*60*1000;
+  state.session.icDoneBeep=false;
+}
 
-  function recountChecks(){
-    const keys = Object.keys(state.session.checks||{});
-    const done = keys.reduce((acc,k)=> acc + (state.session.checks[k]?1:0), 0);
-    const manual = Number(state.session.checksDone||0);
-    const final = Math.max(done, manual);
-    state.session.checksDone = final;
-    checksDoneEl.textContent = final;
-    save();
-  }
-  function attachCheckboxHandlers(){
-    document.querySelectorAll('input[type="checkbox"][data-k]').forEach(cb=>{
-      cb.addEventListener("change", ()=>{
-        const k = cb.getAttribute("data-k");
-        state.session.checks[k] = cb.checked;
-        recountChecks();
-      });
-    });
-  }
+function planForToday(){
+  if(!state.settings.enableSS && !state.settings.enableIC) state.settings.enableSS=true;
 
-  function renderSSChecklist(){
-    const ss = state.session.ss;
-    renderWarm();
-    swList.innerHTML=""; guList.innerHTML="";
-    const wSwing = ss.timed ? ss.Sminus : ss.S;
-    const wGU = ss.timed ? ss.Sminus : ss.S;
-
-    swSub.textContent = ss.twoArm ? "10 sets: 10 two-arm swings" : "10 sets: 10 swings per set (L/R afwisselend)";
-    guSub.textContent = "10 reps: 1 get-up per rep (L/R afwisselend)";
-
-    for(let i=0;i<10;i++){
-      const side = ss.twoArm ? "2A" : (i%2===0 ? "L" : "R");
-      const k = keyFor("sw", i);
-      const checked = !!state.session.checks[k];
-      const div=document.createElement("div");
-      div.className="lineitem";
-      div.innerHTML = `
-        <div class="liLeft">
-          <div class="liTitle">10 ${ss.twoArm ? "two-arm" : side} @ <span class="mono">${wSwing}kg</span></div>
-          <div class="liSub">Swing set ${i+1}/10</div>
-        </div>
-        <div class="liRight">
-          <input type="checkbox" ${checked ? "checked":""} data-k="${k}">
-        </div>
-      `;
-      swList.appendChild(div);
-    }
-
-    for(let i=0;i<10;i++){
-      const side = (i%2===0 ? "L" : "R");
-      const k = keyFor("gu", i);
-      const checked = !!state.session.checks[k];
-      const div=document.createElement("div");
-      div.className="lineitem";
-      div.innerHTML = `
-        <div class="liLeft">
-          <div class="liTitle">1 TGU ${side} @ <span class="mono">${wGU}kg</span></div>
-          <div class="liSub">Get-up ${i+1}/10</div>
-        </div>
-        <div class="liRight">
-          <input type="checkbox" ${checked ? "checked":""} data-k="${k}">
-        </div>
-      `;
-      guList.appendChild(div);
-    }
-
-    state.session.checksGoal = 20;
-    checksGoalEl.textContent = "20";
-    recountChecks();
-    attachCheckboxHandlers();
-  }
-
-  function renderIC(){
-    icMovesList.innerHTML="";
-    const ic = state.session.ic;
-    const dur = state.session.durationMin;
-    const colorLabel = ic.color==="GREEN" ? "Groen" : (ic.color==="ORANGE" ? "Oranje" : "Rood");
-    icSummary.innerHTML = `<b>${state.session.variantLabel}</b><br>Duur: <b class="mono">${dur} min</b> • Kleur: <b>${colorLabel}</b>`;
-    icMovesSub.textContent = "Gebruik de checkboxes als geheugensteun. (Niet verplicht.)";
-
-    const lines = ic.textLines || [];
-    const asItems = lines.length ? lines : ["IC sessie"];
-    asItems.forEach((txt, i)=>{
-      const k = keyFor("ic", i);
-      const checked = !!state.session.checks[k];
-      const div=document.createElement("div");
-      div.className="lineitem";
-      div.innerHTML = `
-        <div class="liLeft">
-          <div class="liTitle">${txt}</div>
-          <div class="liSub">${i===0 ? "Kern" : "Notitie"}</div>
-        </div>
-        <div class="liRight">
-          <input type="checkbox" ${checked ? "checked":""} data-k="${k}">
-        </div>
-      `;
-      icMovesList.appendChild(div);
-    });
-
-    state.session.checksGoal = asItems.length;
-    checksGoalEl.textContent = String(state.session.checksGoal);
-    recountChecks();
-    attachCheckboxHandlers();
-
-    icRuleBox.style.display = "block";
-    const prev = lastIC();
-    icRuleBox.innerHTML = prev
-      ? `Vorige IC: <b class="mono">${prev.durationMin} min</b> • <b>${prev.variantLabel}</b><br><br><b>No-repeat actief:</b> vandaag kan nooit dezelfde duur en nooit dezelfde versie zijn.`
-      : `Nog geen vorige IC sessie.<br><br><b>No-repeat actief:</b> zodra je 1 IC sessie hebt opgeslagen.`;
-  }
-
-  // Timer (stopwatch for SS, countdown for IC)
-  let uiTick=null;
-  function getElapsedMs(){
-    const ses = state.session;
-    if(!ses.startedAt) return 0;
-    const end = ses.paused ? ses.pausedAt : now();
-    return Math.max(0, end - ses.startedAt - (ses.totalPausedMs||0));
-  }
-  function getRemainingMs(){
-    const total = state.session.countdownTotalMs;
-    if(!total) return null;
-    const elapsed = getElapsedMs();
-    return Math.max(0, total - elapsed);
-  }
-  function updateStatus(){
-    const ses = state.session;
-    if(!ses.startedAt){
-      statusText.textContent = "Nog niet gestart.";
-    }else if(ses.paused){
-      statusText.textContent = `Gepauzeerd • ${ses.programPlanned==="IC" ? "remaining" : "elapsed"} ${ses.programPlanned==="IC" ? msToHMS(getRemainingMs()||0) : msToHMS(getElapsedMs())}`;
-    }else{
-      statusText.textContent = `Actief • ${ses.programPlanned==="IC" ? "remaining" : "elapsed"} ${ses.programPlanned==="IC" ? msToHMS(getRemainingMs()||0) : msToHMS(getElapsedMs())}`;
-    }
-  }
-  function ensureTicks(){
-    if(!uiTick){
-      uiTick = setInterval(()=>{
-        if(state.session.programPlanned==="IC"){
-          const rem = getRemainingMs();
-          timeMain.textContent = msToHMS(rem||0);
-          timeSub.textContent = `Duur: ${state.session.durationMin} min`;
-          if(rem!==null && rem<=0 && state.session.startedAt && !state.session.countdownDone){
-            state.session.countdownDone = true;
-            save();
-            doubleBeep();
-          }
-        }else{
-          timeMain.textContent = state.session.startedAt ? msToHMS(getElapsedMs()) : "00:00";
-          timeSub.textContent = "—";
-        }
-        updateStatus();
-      }, 250);
-    }
-  }
-  function startSession(){
-    ensureAudio();
-    if(!state.session.startedAt){
-      state.session.startedAt = now();
-      state.session.totalPausedMs = 0;
-      state.session.paused=false;
-      state.session.pausedAt=null;
-      state.session.countdownDone=false;
-    }else if(state.session.paused){
-      const delta = now() - state.session.pausedAt;
-      state.session.totalPausedMs += delta;
-      state.session.paused=false;
-      state.session.pausedAt=null;
-    }
-    state.session.active=true;
-    save();
-    ensureTicks();
-    requestWakeLock();
-    updateStatus();
-  }
-  function pauseSession(){
-    if(!state.session.startedAt || state.session.paused) return;
-    state.session.paused=true;
-    state.session.pausedAt=now();
-    save();
-    updateStatus();
-  }
-  function resetSession(){
-    state.session.active=false;
+  const today=isoToday();
+  if(state.session.todayDate!==today){
+    state.session.todayDate=today;
     state.session.startedAt=null;
     state.session.paused=false;
     state.session.pausedAt=null;
     state.session.totalPausedMs=0;
-    state.session.countdownDone=false;
-    state.session.checks = {};
-    state.session.checksDone = 0;
-    save();
-    releaseWakeLock();
-    renderToday();
-    updateStatus();
-  }
-  function completeSession(){
-    if(!state.session.startedAt){
-      alert("Start eerst de sessie (timer).");
-      return;
-    }
-    const elapsed = getElapsedMs();
-    const entry = {
-      id: String(now()) + "-" + Math.random().toString(16).slice(2),
-      date: state.session.todayDate,
-      ts: now(),
-      program: state.session.programPlanned,
-      elapsedMs: elapsed,
-      checksDone: state.session.checksDone || 0,
-      checksGoal: state.session.checksGoal || 0,
-      variantId: state.session.variantId,
-      variantLabel: state.session.variantLabel,
-      durationMin: state.session.programPlanned==="IC" ? state.session.durationMin : null,
-    };
-    state.history.push(entry);
-
-    state.session.active=false;
-    state.session.startedAt=null;
-    state.session.paused=false;
-    state.session.pausedAt=null;
-    state.session.totalPausedMs=0;
-    state.session.countdownDone=false;
-    state.session.checks = {};
-    state.session.checksDone = 0;
-    save();
-    releaseWakeLock();
-
-    planToday();
-    renderToday();
-    renderHistory();
-
-    alert(`Opgeslagen ✅\nProgramma: ${entry.program}\nVariant: ${entry.variantLabel}\nTijd: ${msToHMS(elapsed)}`);
+    state.session.coolStartedAt=null;
+    state.session.coolPaused=false;
+    state.session.coolPausedAt=null;
+    state.session.coolTotalPausedMs=0;
+    state.session.icDoneBeep=false;
   }
 
-  document.getElementById("btnMinus").addEventListener("click", ()=>{
-    const v = clamp((state.session.checksDone||0) - 1, 0, state.session.checksGoal||0);
-    state.session.checksDone = v;
-    checksDoneEl.textContent = v;
-    save();
-  });
-  document.getElementById("btnPlus").addEventListener("click", ()=>{
-    const v = clamp((state.session.checksDone||0) + 1, 0, state.session.checksGoal||0);
-    state.session.checksDone = v;
-    checksDoneEl.textContent = v;
-    save();
-  });
-  document.getElementById("btnStart").addEventListener("click", startSession);
-  document.getElementById("btnPause").addEventListener("click", pauseSession);
-  document.getElementById("btnComplete").addEventListener("click", completeSession);
-  document.getElementById("btnResetSession").addEventListener("click", ()=>{
-    if(!confirm("Reset huidige sessie? (timer + checks)")) return;
-    resetSession();
-  });
-
-  // Cooling timer
-  const cdTime = document.getElementById("cdTime");
-  const cdStep = document.getElementById("cdStep");
-  const cdSteps = [
-    {label:"90/90 — links", ms:60*1000},
-    {label:"90/90 — rechts", ms:60*1000},
-    {label:"Straddle — links", ms:60*1000},
-    {label:"Straddle — rechts", ms:60*1000},
-  ];
-  let cdStartAt=null, cdTick=null;
-  function cdPhase(){
-    if(!cdStartAt) return {done:true, label:"—", remaining:0};
-    const t = now() - cdStartAt;
-    let acc=0;
-    for(const st of cdSteps){
-      const next=acc+st.ms;
-      if(t<next) return {done:false, label:st.label, remaining:next-t};
-      acc=next;
-    }
-    return {done:true, label:"Klaar", remaining:0};
-  }
-  function renderCd(){
-    const ph = cdPhase();
-    cdStep.textContent = ph.label;
-    cdTime.textContent = ph.done ? "00:00" : msToMMSS(ph.remaining);
-    if(ph.done && cdTick){
-      clearInterval(cdTick); cdTick=null;
-      doubleBeep();
-    }
-  }
-  document.getElementById("btnCdStart").addEventListener("click", ()=>{
-    ensureAudio();
-    cdStartAt = now();
-    renderCd();
-    if(!cdTick) cdTick=setInterval(renderCd, 250);
-  });
-  document.getElementById("btnCdReset").addEventListener("click", ()=>{
-    cdStartAt=null;
-    if(cdTick){clearInterval(cdTick); cdTick=null;}
-    renderCd();
-  });
-
-  // Render Today
-  function renderToday(){
-    planToday();
-    const planned = state.session.programPlanned;
-    const dur = state.session.durationMin;
-
-    todayPill.textContent = `Vandaag: ${planned==="SS" ? "S&S" : "IC"}`
-    const prevIC = lastIC();
-    icPill.textContent = prevIC ? `IC laatst: ${prevIC.durationMin}m • ${prevIC.variantLabel}` : "IC: nog geen sessie";
-
-    if(planned==="SS"){
-      tagProgram.textContent = "Simple & Sinister";
-      tagProgram.className = "tag good";
-      tagVariant.textContent = state.session.ss.timed ? "Timed (S−)" : "Practice";
-      tagVariant.className = "tag muted";
-      tagDuration.textContent = "Timer: stopwatch";
-      tagDuration.className = "tag muted";
-      todaySubtitle.textContent = `${state.session.todayDate} • Warm-up → Swings → Get-ups → Cooling.`;
-
-      ssBlock.classList.remove("hide");
-      icBlock.classList.add("hide");
-      icRuleBox.style.display = "none";
-
-      timerLabel.textContent = "Stopwatch";
-      timerHint.textContent = "S&S gebruikt stopwatch (duur vrij).";
-      state.session.countdownTotalMs = null;
-
-      renderSSChecklist();
-      timeMain.textContent = state.session.startedAt ? msToHMS(getElapsedMs()) : "00:00";
-      timeSub.textContent = "—";
-    }else{
-      tagProgram.textContent = "Iron Cardio";
-      tagProgram.className = "tag warn";
-      tagVariant.textContent = state.session.variantLabel || "—";
-      tagVariant.className = "tag muted";
-      tagDuration.textContent = `Duur: ${dur} min`;
-      tagDuration.className = "tag muted";
-      todaySubtitle.textContent = `${state.session.todayDate} • IC sessie met countdown. Eindigt met dubbele beep.`;
-
-      ssBlock.classList.add("hide");
-      icBlock.classList.remove("hide");
-      timerLabel.textContent = "Countdown";
-      timerHint.textContent = "IC countdown: tijd over. Dubbele beep op 0. (No-repeat actief.)";
-
-      renderIC();
-      const rem = getRemainingMs();
-      timeMain.textContent = state.session.startedAt ? msToHMS(rem||0) : msToHMS(state.session.countdownTotalMs||0);
-      timeSub.textContent = `Duur: ${dur} min`;
-    }
-
-    sumKey.textContent = planned==="SS" ? `S&S • ${state.session.ss.S}kg (S)` : `IC • ${dur} min`;
-    sumRule.textContent = planned==="SS" ? (state.session.ss.timed ? "Timed = S−" : (state.session.ss.twoArm ? "Elke 3e: two-arm" : "One-arm")) : "No-repeat: duur + variant";
-
-    checksDoneEl.textContent = String(state.session.checksDone||0);
-    checksGoalEl.textContent = String(state.session.checksGoal||0);
-
-    ensureTicks();
-    updateStatus();
+  let planned=state.session.programPlanned;
+  const ssOn=!!state.settings.enableSS, icOn=!!state.settings.enableIC;
+  if(!planned || (planned==="SS" && !ssOn) || (planned==="IC" && !icOn)){
+    const last=getLastCompleted();
+    const lastProg=last?last.program:null;
+    if(ssOn && icOn) planned = lastProg ? (lastProg==="SS"?"IC":"SS") : "SS";
+    else planned = ssOn ? "SS" : "IC";
+    state.session.programPlanned=planned;
+    state.session.ss=null; state.session.ic=null;
+    state.session.checks={}; state.session.icSets=0;
+    state.session.startedAt=null; state.session.paused=false; state.session.totalPausedMs=0;
   }
 
-  // Settings
-  const toggleSS = document.getElementById("toggleSS");
-  const toggleIC = document.getElementById("toggleIC");
-  const inpS = document.getElementById("inpS");
-  const toggleTimed = document.getElementById("toggleTimed");
-  const toggleTwoArmEvery3 = document.getElementById("toggleTwoArmEvery3");
-  const toggleICPullup = document.getElementById("toggleICPullup");
-  const toggleICDouble = document.getElementById("toggleICDouble");
+  if(planned==="SS"){
+    if(!state.session.ss) buildSS();
+  }else{
+    if(!state.session.ic) buildIC();
+  }
+  save();
+}
 
-  function renderSettings(){
-    const s=state.settings;
-    toggleSS.checked=!!s.enableSS;
-    toggleIC.checked=!!s.enableIC;
-    inpS.value=s.S;
-    toggleTimed.checked=!!s.timedEnabled;
-    toggleTwoArmEvery3.checked=!!s.twoArmEvery3;
-    toggleICPullup.checked=!!s.icAllowPullup;
-    toggleICDouble.checked=!!s.icAllowDouble;
+function setDetailsLabel(el){
+  const t=el.querySelector("summary .tag"); if(!t) return;
+  t.textContent = el.open ? "open" : "dicht";
+}
+function renderChips(){
+  const dot=$("#dotWake"), chip=$("#chipWake");
+  if(wakeLock){ dot.className="dot good"; chip.textContent="Wake lock: aan"; }
+  else { dot.className="dot"; chip.textContent="Wake lock: uit"; }
+}
 
-    document.getElementById("prevProgram").textContent = state.session.programPlanned==="SS" ? "S&S" : "IC";
-    document.getElementById("prevProgram").className = "tag " + (state.session.programPlanned==="SS" ? "good" : "warn");
-    document.getElementById("prevVar").textContent = state.session.variantLabel || "—";
-    document.getElementById("prevDur").textContent = state.session.programPlanned==="IC" ? `${state.session.durationMin} min` : "—";
+function renderSSLists(){
+  const ss=state.session.ss;
+  const swingsSub=$("#main1Sub"), swingsList=$("#main1List");
+  const guSub=$("#main2Sub"), guList=$("#main2List");
+
+  const timed = ss.timed && (ss.S>=32 || state.settings.timedVisible);
+  swingsSub.textContent = timed
+    ? `Timed slot #3: 100 swings @ ${ss.Sminus}kg (S−).`
+    : `Practice: ${ss.sPlusSets}/10 sets per kant @ S+ (${ss.Splus}kg), rest @ S (${ss.S}kg).`;
+
+  guSub.textContent = timed
+    ? `Timed slot #3: 10 get-ups @ ${ss.Sminus}kg (S−).`
+    : `Practice: ${ss.sPlusSets}/10 reps per kant @ S+ (${ss.Splus}kg), rest @ S (${ss.S}kg).`;
+
+  swingsList.innerHTML=""; guList.innerHTML="";
+
+  for(let i=0;i<10;i++){
+    const usePlus = (!timed) && (i < ss.sPlusSets);
+    const w = timed ? ss.Sminus : (usePlus ? ss.Splus : ss.S);
+    const key=`sw-${i}`;
+    const checked=!!state.session.checks[key];
+    const label = ss.twoArm ? `10 two-hand swings @ ${w}kg` : `10 swings ${i%2===0?"L":"R"} @ ${w}kg`;
+    swingsList.insertAdjacentHTML("beforeend", `<div class="item"><div class="left"><label><input type="checkbox" data-k="${key}" ${checked?"checked":""}/> <span>${label}</span></label></div></div>`);
+  }
+  for(let i=0;i<10;i++){
+    const usePlus = (!timed) && (i < ss.sPlusSets);
+    const w = timed ? ss.Sminus : (usePlus ? ss.Splus : ss.S);
+    const key=`gu-${i}`;
+    const checked=!!state.session.checks[key];
+    const label=`Get-up ${i%2===0?"L":"R"} @ ${w}kg`;
+    guList.insertAdjacentHTML("beforeend", `<div class="item"><div class="left"><label><input type="checkbox" data-k="${key}" ${checked?"checked":""}/> <span>${label}</span></label></div></div>`);
+  }
+  swingsList.onchange=(e)=>{ const k=e.target?.dataset?.k; if(!k) return; state.session.checks[k]=!!e.target.checked; save(); };
+  guList.onchange=(e)=>{ const k=e.target?.dataset?.k; if(!k) return; state.session.checks[k]=!!e.target.checked; save(); };
+}
+
+function renderICBlock(){
+  const ic=state.session.ic;
+  $("#icSets").textContent=String(state.session.icSets||0);
+  $("#icSummary").innerHTML = `<strong>${ic.sessionType}</strong> session · <strong>${ic.timeMin} min</strong> · <strong>${ic.loadLevel}</strong> (${ic.loadKg}kg)
+    <br/><span class="small">Dobbel: A=${ic.die.a}, B=${ic.die.b}, C=${ic.die.c}, D=${ic.die.d}</span>
+    <div class="hr"></div>
+    <div class="small"><strong>Variant:</strong> ${ic.variantText}</div>`;
+}
+
+function sessionElapsedMs(){
+  if(!state.session.startedAt) return 0;
+  const base = (state.session.paused ? state.session.pausedAt : nowMs()) - state.session.startedAt;
+  return Math.max(0, base - (state.session.totalPausedMs||0));
+}
+function renderTimer(){
+  const prog=state.session.programPlanned;
+  const status=$("#statusText"), display=$("#timeDisplay");
+  if(!state.session.startedAt){
+    status.textContent="klaar";
+    display.textContent = (prog==="IC" && state.session.icCountdownMs!=null) ? fmtMs(state.session.icCountdownMs) : "00:00";
+    return;
+  }
+  status.textContent = state.session.paused ? "pauze" : "loopt";
+  if(prog==="SS"){
+    display.textContent = fmtMs(sessionElapsedMs());
+  }else{
+    const rem = Math.max(0, (state.session.icCountdownMs||0) - sessionElapsedMs());
+    display.textContent = fmtMs(rem);
+    if(rem===0 && !state.session.icDoneBeep){ state.session.icDoneBeep=true; save(); beepDouble(); }
+  }
+}
+function startSession(){
+  if(!state.session.startedAt){
+    state.session.startedAt=nowMs(); state.session.paused=false; state.session.totalPausedMs=0; state.session.icDoneBeep=false;
+    save(); setWake(true); renderAll(); return;
+  }
+  if(state.session.paused){
+    const pausedDur = nowMs() - (state.session.pausedAt||nowMs());
+    state.session.totalPausedMs = (state.session.totalPausedMs||0) + pausedDur;
+    state.session.paused=false; state.session.pausedAt=null;
+    save(); setWake(true); renderAll();
+  }
+}
+function pauseSession(){
+  if(!state.session.startedAt || state.session.paused) return;
+  state.session.paused=true; state.session.pausedAt=nowMs();
+  save(); setWake(false); renderAll();
+}
+function completeSession(){
+  const prog=state.session.programPlanned;
+  const entry={date:state.session.todayDate, program:prog, elapsedMs:sessionElapsedMs(), ss:(prog==="SS"?state.session.ss:null), ic:(prog==="IC"?state.session.ic:null)};
+  state.history.push(entry);
+  if(prog==="SS") state.counters.ssCounter=(state.counters.ssCounter||0)+1;
+
+  state.session.startedAt=null; state.session.paused=false; state.session.pausedAt=null; state.session.totalPausedMs=0;
+  state.session.checks={}; state.session.icSets=0; state.session.icDoneBeep=false;
+  if(state.settings.enableSS && state.settings.enableIC) state.session.programPlanned = (prog==="SS")?"IC":"SS";
+  state.session.ss=null; state.session.ic=null; state.session.icCountdownMs=null;
+  save(); setWake(false); renderAll();
+}
+
+function coolElapsedMs(){
+  if(!state.session.coolStartedAt) return 0;
+  const base=(state.session.coolPaused?state.session.coolPausedAt:nowMs())-state.session.coolStartedAt;
+  return Math.max(0, base-(state.session.coolTotalPausedMs||0));
+}
+function renderCool(){
+  $("#coolStatus").textContent = state.session.coolStartedAt ? (state.session.coolPaused?"pauze":"loopt") : "klaar";
+  $("#coolTime").textContent = state.session.coolStartedAt ? fmtMs(coolElapsedMs()) : "00:00";
+}
+function coolStart(){
+  if(!state.session.coolStartedAt){
+    state.session.coolStartedAt=nowMs(); state.session.coolPaused=false; state.session.coolTotalPausedMs=0; save(); renderAll(); return;
+  }
+  if(state.session.coolPaused){
+    const pausedDur=nowMs()-(state.session.coolPausedAt||nowMs());
+    state.session.coolTotalPausedMs=(state.session.coolTotalPausedMs||0)+pausedDur;
+    state.session.coolPaused=false; state.session.coolPausedAt=null; save(); renderAll();
+  }
+}
+function coolPause(){
+  if(!state.session.coolStartedAt || state.session.coolPaused) return;
+  state.session.coolPaused=true; state.session.coolPausedAt=nowMs(); save(); renderAll();
+}
+function coolReset(){
+  state.session.coolStartedAt=null; state.session.coolPaused=false; state.session.coolPausedAt=null; state.session.coolTotalPausedMs=0; save(); renderAll();
+}
+
+function renderHistory(){
+  const list=$("#histList"); list.innerHTML="";
+  const h=state.history.slice().reverse();
+  if(!h.length){ list.innerHTML='<div class="small">Nog geen sessies.</div>'; return; }
+  h.slice(0,40).forEach(e=>{
+    const mins=Math.round((e.elapsedMs||0)/60000);
+    const title=`${e.date} · ${e.program==="SS"?"S&S":"IC"} · ${mins} min`;
+    const sub=e.program==="SS" && e.ss ? `Micro #${e.ss.microIndex} · S ${e.ss.S}kg` : (e.program==="IC" && e.ic ? `${e.ic.sessionType} · ${e.ic.timeMin} min · ${e.ic.variantText}` : "");
+    list.insertAdjacentHTML("beforeend", `<div class="item"><div class="left" style="flex-direction:column;align-items:flex-start;gap:4px"><div style="font-weight:850">${title}</div><div class="small">${sub}</div></div></div>`);
+  });
+}
+
+function syncSettingsUI(){
+  $("#setEnableSS").value=state.settings.enableSS?"1":"0";
+  $("#setEnableIC").value=state.settings.enableIC?"1":"0";
+  $("#ssBell").value=state.settings.ssBell;
+  $("#ssBellPlus").value=state.settings.ssBellPlus;
+  $("#twoArmEveryThird").value=state.settings.twoArmEveryThird?"1":"0";
+  $("#timedVisible").value=state.settings.timedVisible?"1":"0";
+  $("#icEasy").value=state.settings.icEasy;
+  $("#icMed").value=state.settings.icMed;
+  $("#icHeavy").value=state.settings.icHeavy;
+  $("#icDoubleOK").value=state.settings.icDoubleOK?"1":"0";
+}
+function applySettings(){
+  state.settings.enableSS=$("#setEnableSS").value==="1";
+  state.settings.enableIC=$("#setEnableIC").value==="1";
+  state.settings.ssBell=clamp4(safeInt($("#ssBell").value,24));
+  state.settings.ssBellPlus=clamp4(safeInt($("#ssBellPlus").value, state.settings.ssBell+8));
+  state.settings.twoArmEveryThird=$("#twoArmEveryThird").value==="1";
+  state.settings.timedVisible=$("#timedVisible").value==="1";
+  state.settings.icEasy=clamp4(safeInt($("#icEasy").value,16));
+  state.settings.icMed=clamp4(safeInt($("#icMed").value,20));
+  state.settings.icHeavy=clamp4(safeInt($("#icHeavy").value,24));
+  state.settings.icDoubleOK=$("#icDoubleOK").value==="1";
+  if(!state.settings.enableSS && !state.settings.enableIC) state.settings.enableSS=true;
+
+  state.session.programPlanned=null;
+  state.session.ss=null; state.session.ic=null;
+  state.session.startedAt=null; state.session.paused=false; state.session.totalPausedMs=0;
+  state.session.checks={}; state.session.icSets=0;
+  save(); renderAll();
+}
+function resetAll(){
+  if(!confirm("Alles resetten?")) return;
+  localStorage.removeItem(LS_KEY);
+  state=defaultState(); save(); renderAll();
+}
+
+function renderAll(){
+  planForToday();
+  const prog=state.session.programPlanned;
+  $("#chipToday").textContent=`Vandaag: ${prog==="SS"?"S&S":"IC"}`;
+  $("#chipIC").textContent = (prog==="IC" && state.session.ic) ? `IC: ${state.session.ic.sessionType} · ${state.session.ic.timeMin}m · ${state.session.ic.loadLevel}` : "IC: —";
+
+  const tags=[];
+  if(prog==="SS" && state.session.ss){
+    const ss=state.session.ss;
+    tags.push(`<span class="tag"><strong>S&amp;S</strong></span>`);
+    tags.push(`<span class="tag"><strong>Micro</strong> #${ss.microIndex}</span>`);
+    tags.push(`<span class="tag"><strong>Step</strong> +${ss.sPlusSets}/10</span>`);
+    if(ss.timed && (ss.S>=32 || state.settings.timedVisible)) tags.push(`<span class="tag"><strong>Timed (S− ${ss.Sminus}kg)</strong></span>`);
+    else tags.push(`<span class="tag"><strong>Practice</strong></span>`);
+  }else if(prog==="IC" && state.session.ic){
+    const ic=state.session.ic;
+    tags.push(`<span class="tag"><strong>IC</strong></span>`);
+    tags.push(`<span class="tag"><strong>${ic.sessionType}</strong></span>`);
+    tags.push(`<span class="tag"><strong>${ic.timeMin} min</strong></span>`);
+    tags.push(`<span class="tag"><strong>${ic.loadLevel}</strong> · ${ic.loadKg}kg</span>`);
+  }
+  $("#todayTags").innerHTML=tags.join("");
+
+  ["accWarm","accMain1","accMain2","accIC","accCool"].forEach(id=>{ const el=document.getElementById(id); if(el) setDetailsLabel(el); });
+
+  if(prog==="SS"){
+    $("#accIC").style.display="none";
+    $("#accMain1").style.display="";
+    $("#accMain2").style.display="";
+    $("#timerModeTag").textContent="Stopwatch";
+    $("#timerHint").textContent="S&S: stopwatch, loopt door bij app-switch.";
+    renderSSLists();
+  }else{
+    $("#accIC").style.display="";
+    $("#accMain1").style.display="none";
+    $("#accMain2").style.display="none";
+    $("#timerModeTag").textContent="Countdown";
+    $("#timerHint").textContent="IC: countdown, dubbele beep op 0.";
+    renderICBlock();
+    $("#icSets").textContent=String(state.session.icSets||0);
   }
 
-  function saveSettings(){
-    const s=state.settings;
-    s.enableSS = toggleSS.checked;
-    s.enableIC = toggleIC.checked;
-    s.S = roundTo4(Number(inpS.value||24)); inpS.value=s.S;
-    s.timedEnabled = toggleTimed.checked;
-    s.twoArmEvery3 = toggleTwoArmEvery3.checked;
-    s.icAllowPullup = toggleICPullup.checked;
-    s.icAllowDouble = toggleICDouble.checked;
-    save();
-    renderToday();
-    renderSettings();
-  }
-
-  document.getElementById("btnSaveSettings").addEventListener("click", ()=>{ saveSettings(); alert("Settings opgeslagen ✅"); });
-  document.getElementById("btnRecalc").addEventListener("click", ()=>{ saveSettings(); alert("Vandaag herberekend ✅"); });
-  document.getElementById("btnFactory").addEventListener("click", ()=>{
-    if(!confirm("Factory reset? Dit wist settings + sessie + history.")) return;
-    localStorage.removeItem("ss_ic_alt_v1");
-    state = defaultState();
-    save();
-    releaseWakeLock();
-    renderToday();
-    renderSettings();
-    renderHistory();
-    alert("Reset klaar.");
-  });
-
-  // History
-  const historyList = document.getElementById("historyList");
-  const historyEmpty = document.getElementById("historyEmpty");
-
-  function renderHistory(){
-    const list = state.history.slice().reverse();
-    historyList.innerHTML="";
-    historyEmpty.style.display = list.length ? "none" : "block";
-    list.forEach(h=>{
-      const div=document.createElement("div");
-      div.className="lineitem";
-      div.innerHTML = `
-        <div class="liLeft">
-          <div class="liTitle">${h.date} — ${h.program} — ${h.variantLabel || ""}</div>
-          <div class="liSub mono">Tijd: ${msToHMS(h.elapsedMs)} ${h.program==="IC" ? ("• IC duur: "+h.durationMin+"m") : ""}</div>
-        </div>
-      `;
-      historyList.appendChild(div);
-    });
-  }
-
-  document.getElementById("btnExport").addEventListener("click", ()=>{
-    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url; a.download="ss-ic-log.json";
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  });
-
-  document.getElementById("btnImport").addEventListener("click", ()=>{
-    const inp=document.createElement("input");
-    inp.type="file"; inp.accept="application/json";
-    inp.onchange=async ()=>{
-      const file=inp.files && inp.files[0];
-      if(!file) return;
-      try{
-        const parsed=JSON.parse(await file.text());
-        state = merge(defaultState(), parsed);
-        save();
-        renderToday(); renderSettings(); renderHistory();
-        alert("Import klaar ✅");
-      }catch(e){ alert("Kon JSON niet importeren."); }
-    };
-    inp.click();
-  });
-
-  document.getElementById("btnClearHistory").addEventListener("click", ()=>{
-    if(!confirm("History wissen?")) return;
-    state.history=[];
-    save();
-    renderHistory();
-    renderToday();
-    renderSettings();
-  });
-
-  // Init
-  renderToday();
-  renderSettings();
+  renderTimer();
+  renderCool();
+  renderChips();
   renderHistory();
-  renderCd();
-  setWakeUI(false);
-})();
+}
+
+// tabs
+function showTab(name){
+  $("#tab-today").style.display=(name==="today")?"":"none";
+  $("#tab-settings").style.display=(name==="settings")?"":"none";
+  $("#tab-history").style.display=(name==="history")?"":"none";
+  $$(".tab").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
+  if(name==="settings") syncSettingsUI();
+  if(name==="history") renderHistory();
+}
+
+$$(".tab").forEach(b=>b.addEventListener("click", ()=>showTab(b.dataset.tab)));
+$("#btnStart").addEventListener("click", startSession);
+$("#btnPause").addEventListener("click", pauseSession);
+$("#btnComplete").addEventListener("click", completeSession);
+$("#btnCoolStart").addEventListener("click", coolStart);
+$("#btnCoolPause").addEventListener("click", coolPause);
+$("#btnCoolReset").addEventListener("click", coolReset);
+$("#btnIcPlus").addEventListener("click", ()=>{ state.session.icSets=(state.session.icSets||0)+1; save(); renderAll(); });
+$("#btnIcMinus").addEventListener("click", ()=>{ state.session.icSets=Math.max(0,(state.session.icSets||0)-1); save(); renderAll(); });
+
+["setEnableSS","setEnableIC","ssBell","ssBellPlus","twoArmEveryThird","timedVisible","icEasy","icMed","icHeavy","icDoubleOK"].forEach(id=>document.getElementById(id).addEventListener("change", applySettings));
+$("#btnResetAll").addEventListener("click", resetAll);
+
+setInterval(()=>{ renderTimer(); renderCool(); }, 250);
+
+showTab("today");
+renderAll();
 </script>
 </body>
 </html>
