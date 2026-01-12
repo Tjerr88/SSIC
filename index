@@ -4,184 +4,143 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>S&S + Iron Cardio — Alternating Trainer</title>
+
 <style>
 :root{
   --bg:#0b0d12;
-  --card:#141826;
-  --card2:#0f1320;
-  --txt:#e9edf7;
-  --muted:#a8b0c6;
-  --line:rgba(255,255,255,.08);
-  --accent:#7c5cff;
-  --good:#32d583;
-  --bad:#ff5a67;
-  --warn:#f7b955;
-  --r:18px;
-  --shadow: 0 12px 40px rgba(0,0,0,.45);
+  --txt:#eef2ff;
+  --muted:#a6b0c6;
+  --line:rgba(255,255,255,.10);
+  --good:#2dd4bf;
+  --bad:#fb7185;
+  --warn:#fbbf24;
+  --accent:#8b5cf6;
 }
 *{box-sizing:border-box}
 body{
   margin:0;
   font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-  background: radial-gradient(1200px 800px at 20% -10%, rgba(124,92,255,.18), transparent 60%),
-              radial-gradient(900px 600px at 90% 10%, rgba(50,213,131,.12), transparent 55%),
-              var(--bg);
+  background: var(--bg);
   color:var(--txt);
-  padding:16px 14px calc(18px + env(safe-area-inset-bottom));
+  padding:14px 14px calc(18px + env(safe-area-inset-bottom));
 }
-h1{font-size:20px;margin:0 0 6px 0}
-p{margin:0}
+.container{max-width:720px;margin:0 auto}
+h1{font-size:18px;margin:0}
 .small{font-size:12px;color:var(--muted);line-height:1.35}
-.container{max-width:740px;margin:0 auto}
 .top{
-  padding:16px;
-  border:1px solid var(--line);
-  border-radius:22px;
-  background: linear-gradient(180deg, rgba(20,24,38,.92), rgba(15,19,32,.92));
-  box-shadow: var(--shadow);
-}
-.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.chip{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;
-  border:1px solid var(--line);
-  background: rgba(255,255,255,.03);
-  border-radius:999px;
-  font-size:13px;
-}
-.dot{width:10px;height:10px;border-radius:50%;background:#637099}
-.dot.good{background:var(--good)}
-.dot.warn{background:var(--warn)}
-.dot.bad{background:var(--bad)}
-.tabs{
-  margin-top:14px;
-  display:flex;gap:8px;
-  padding:8px;
-  background: rgba(255,255,255,.03);
-  border:1px solid var(--line);
-  border-radius:20px;
-}
-.tab{
-  flex:1;
-  padding:12px 10px;
-  text-align:center;
-  border-radius:16px;
-  border:1px solid transparent;
-  color:var(--muted);
-  font-weight:650;
-  background: transparent;
-}
-.tab.active{
-  background: rgba(124,92,255,.18);
-  border-color: rgba(124,92,255,.35);
-  color:var(--txt);
-}
-.section{margin-top:14px}
-.card{
-  background: linear-gradient(180deg, rgba(20,24,38,.92), rgba(12,16,28,.92));
-  border:1px solid var(--line);
-  border-radius:22px;
-  box-shadow: var(--shadow);
   padding:14px;
-}
-.card + .card{margin-top:12px}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.hr{height:1px;background:var(--line);margin:12px 0}
-.tag{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:8px 10px;border-radius:999px;
-  border:1px solid var(--line);
-  background: rgba(255,255,255,.03);
-  color:var(--muted);
-  font-size:12px;
-}
-.tag strong{color:var(--txt)}
-.kpi{
-  display:flex;gap:10px;flex-wrap:wrap;margin-top:10px
-}
-.kpi .tag{padding:9px 12px;font-size:13px}
-details{
   border:1px solid var(--line);
   border-radius:18px;
   background: rgba(255,255,255,.02);
+}
+.statusRow{
+  margin-top:10px;
+  display:flex;gap:10px;flex-wrap:wrap;
+  color:var(--muted);
+  font-size:13px;
+}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:999px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.02);
+}
+.dot{width:9px;height:9px;border-radius:50%;background:#64748b}
+.dot.good{background:var(--good)}
+.dot.bad{background:var(--bad)}
+.dot.warn{background:var(--warn)}
+.tabs{ margin-top:12px; display:flex; gap:8px; }
+.tab{
+  flex:1; padding:10px 10px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.02);
+  color:var(--muted);
+  font-weight:750;
+}
+.tab.active{
+  color:var(--txt);
+  border-color: rgba(139,92,246,.5);
+  background: rgba(139,92,246,.12);
+}
+.section{margin-top:12px}
+.card{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background: rgba(255,255,255,.02);
+}
+.hr{height:1px;background:var(--line);margin:12px 0}
+details{
+  border:1px solid var(--line);
+  border-radius:16px;
+  background: rgba(255,255,255,.015);
   overflow:hidden;
 }
 details + details{margin-top:10px}
 summary{
   list-style:none;
   cursor:pointer;
-  padding:14px 14px;
+  padding:12px 12px;
   display:flex;align-items:center;justify-content:space-between;
-  font-weight:800;
+  font-weight:850;
 }
 summary::-webkit-details-marker{display:none}
-.detailsBody{padding:0 14px 14px 14px}
+.detailsBody{padding:0 12px 12px 12px}
 .list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 .item{
-  display:flex;gap:10px;align-items:center;justify-content:space-between;
-  padding:10px 10px;border:1px solid var(--line);
-  border-radius:16px;background: rgba(255,255,255,.02);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 10px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background: rgba(0,0,0,.12);
 }
-.item .left{display:flex;gap:10px;align-items:center}
 .item label{display:flex;gap:10px;align-items:center;cursor:pointer}
 .item input[type="checkbox"]{width:20px;height:20px}
-.mono{font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1; letter-spacing:.5px}
+.mono{font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1;}
 .timerBox{
   margin-top:10px;
   border:1px solid var(--line);
-  border-radius:18px;
+  border-radius:16px;
   padding:12px;
-  background: rgba(0,0,0,.18);
+  background: rgba(0,0,0,.14);
 }
-.bigTime{font-size:52px; font-weight:900; line-height:1; margin:6px 0 10px 0}
+.bigTime{font-size:44px;font-weight:900;line-height:1;margin:6px 0 10px}
 .btnRow{display:flex;gap:10px;flex-wrap:wrap}
 button{
   border:none;cursor:pointer;
-  padding:14px 14px;
-  border-radius:16px;
-  font-weight:800;
+  padding:12px 12px;
+  border-radius:14px;
+  font-weight:850;
   font-size:16px;
 }
-.btn{
-  background: rgba(255,255,255,.06);
-  color:var(--txt);
-  border:1px solid var(--line);
-}
-.btn.good{background: rgba(50,213,131,.16); border:1px solid rgba(50,213,131,.25)}
-.btn.bad{background: rgba(255,90,103,.14); border:1px solid rgba(255,90,103,.22)}
-.btn.warn{background: rgba(247,185,85,.16); border:1px solid rgba(247,185,85,.25)}
-.btn:active{transform: translateY(1px)}
-input[type="number"], input[type="text"], select{
+.btn{background: rgba(255,255,255,.06); color:var(--txt); border:1px solid var(--line)}
+.btn.good{border-color: rgba(45,212,191,.35); background: rgba(45,212,191,.12)}
+.btn.bad{border-color: rgba(251,113,133,.35); background: rgba(251,113,133,.10)}
+.btn.warn{border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.10)}
+input[type="number"], select{
   width:100%;
   padding:12px 12px;
-  border-radius:16px;
+  border-radius:14px;
   border:1px solid var(--line);
-  background: rgba(255,255,255,.03);
+  background: rgba(0,0,0,.18);
   color: var(--txt);
   outline:none;
   font-size:15px;
 }
-.grid{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap:12px;
-}
-@media(min-width:720px){
-  body{padding:18px}
-  h1{font-size:22px}
-  .grid{grid-template-columns: 1fr 1fr}
-}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:720px){ .grid{grid-template-columns:1fr 1fr} h1{font-size:20px} }
 </style>
+
 </head>
 <body>
 <div class="container">
   <div class="top">
-    <h1>S&amp;S + Iron Cardio — Alternating Trainer</h1>
-    <p class="small">S&amp;S: microcyclus = 5 S&amp;S sessies. Alleen sessie <strong>#3</strong> is Timed (S−). Step-cycle: elke 3 microcycli (=15 S&amp;S sessies) schuift S+ 1 set per kant omhoog (0/2/4/6/8).<br/>IC: 4 dobbelstenen: Sessietype → Tijd → Load → Variatie (alleen waar opties bestaan). Heavy–Easy is altijd Clean + Push Press + Goblet Squat.</p>
-    <div class="chips">
-      <div class="chip"><span class="dot" id="dotWake"></span><span id="chipWake">Wake lock: uit</span></div>
-      <div class="chip"><span class="dot good"></span><span id="chipToday">Vandaag: —</span></div>
-      <div class="chip"><span class="dot"></span><span id="chipIC">IC: —</span></div>
+    <h1>S&S + Iron Cardio</h1>
+    <div class="statusRow">
+      <span class="badge"><span class="dot" id="dotWake"></span><span id="chipWake">Wake lock: uit</span></span>
+      <span class="badge"><span class="dot good"></span><span id="chipToday">Vandaag: —</span></span>
+      <span class="badge"><span class="dot"></span><span id="chipIC">IC: —</span></span>
     </div>
 
     <div class="tabs">
@@ -193,7 +152,7 @@ input[type="number"], input[type="text"], select{
 
   <section class="section" id="tab-today">
     <div class="card">
-      <div class="kpi" id="todayTags"></div>
+      <div class="small" id="todayTags"></div>
 
       <details id="accWarm" open>
         <summary><span>Warm-up (3 rondes)</span><span class="tag">dicht</span></summary>
@@ -769,7 +728,7 @@ function renderAll(){
     tags.push(`<span class="tag"><strong>${ic.timeMin} min</strong></span>`);
     tags.push(`<span class="tag"><strong>${ic.loadLevel}</strong> · ${ic.loadKg}kg</span>`);
   }
-  $("#todayTags").innerHTML=tags.join("");
+  $("#todayTags").textContent = tags.map(t=>t.replace(/<[^>]+>/g,"").replace(/\\s+/g," ").trim()).join(" · ");
 
   ["accWarm","accMain1","accMain2","accIC","accCool"].forEach(id=>{ const el=document.getElementById(id); if(el) setDetailsLabel(el); });
 
